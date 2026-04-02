@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Set 2 - Esthetician State Board Practice</title>
+<style>/* fonts loaded inline */</style>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #faf7f2;
+    --warm-white: #fff9f4;
+    --blush: #e8c4b8;
+    --rose: #c97d6e;
+    --deep: #3a2a25;
+    --mid: #7a5c54;
+    --green: #4a7c59;
+    --green-light: #e8f4ec;
+    --red-light: #fcecea;
+    --red: #c0392b;
+    --shadow: 0 2px 20px rgba(58,42,37,0.08);
+  }
+
+  body {
+    font-family: 'DM Sans', Arial, sans-serif;
+    background: var(--cream);
+    color: var(--deep);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    background: var(--deep);
+    color: var(--cream);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.02em;
+  }
+
+  #score-badge {
+    background: var(--blush);
+    color: var(--deep);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    gap: 12px;
+  }
+
+  #score-badge span { opacity: 0.6; }
+  #score-badge b { color: var(--deep); }
+
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--blush);
+    transition: width 0.4s ease;
+  }
+
+  main {
+    width: 100%;
+    max-width: 700px;
+    padding: 40px 20px 80px;
+    flex: 1;
+  }
+
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .q-num {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--mid);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .q-jump {
+    font-size: 0.8rem;
+    color: var(--mid);
+  }
+  .q-jump input {
+    width: 52px;
+    border: 1px solid var(--blush);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--deep);
+    background: var(--warm-white);
+    text-align: center;
+  }
+
+  .card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-text {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: var(--deep);
+    margin-bottom: 28px;
+  }
+
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+
+  .choice {
+    background: var(--cream);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--deep);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    text-align: left;
+  }
+
+  .choice:hover:not(.disabled) {
+    border-color: var(--blush);
+    background: #fdf0eb;
+    transform: translateX(3px);
+  }
+
+  .choice .letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--blush);
+    color: var(--deep);
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .choice.correct {
+    background: var(--green-light);
+    border-color: var(--green);
+  }
+  .choice.correct .letter { background: var(--green); color: #fff; }
+
+  .choice.wrong {
+    background: var(--red-light);
+    border-color: var(--red);
+  }
+  .choice.wrong .letter { background: var(--red); color: #fff; }
+
+  .choice.reveal-correct {
+    background: var(--green-light);
+    border-color: var(--green);
+    opacity: 0.75;
+  }
+  .choice.reveal-correct .letter { background: var(--green); color: #fff; }
+
+  .choice.disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 20px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: none;
+  }
+  .feedback.show { display: block; animation: fadeIn 0.25s ease; }
+  .feedback.correct-fb { background: var(--green-light); color: var(--green); }
+  .feedback.wrong-fb { background: var(--red-light); color: var(--red); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .nav-row {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+
+  .btn-primary {
+    background: var(--deep);
+    color: var(--cream);
+    flex: 1;
+  }
+  .btn-secondary {
+    background: var(--blush);
+    color: var(--deep);
+  }
+  .btn-skip {
+    background: transparent;
+    color: var(--mid);
+    border: 2px solid #e0d8d2;
+  }
+
+  /* Summary screen */
+  #summary {
+    display: none;
+    text-align: center;
+    animation: slideIn 0.4s ease;
+  }
+  #summary.show { display: block; }
+
+  .summary-card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 48px 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+
+  .big-score {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 5rem;
+    color: var(--deep);
+    line-height: 1;
+  }
+  .big-score span { font-size: 2rem; color: var(--mid); }
+
+  .summary-label {
+    font-size: 0.85rem;
+    color: var(--mid);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+    margin-bottom: 28px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .stat-pill {
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .stat-pill.c { background: var(--green-light); color: var(--green); }
+  .stat-pill.w { background: var(--red-light); color: var(--red); }
+  .stat-pill.s { background: #e8eaf6; color: #3949ab; }
+
+  /* Shuffle mode */
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--mid);
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle-switch {
+    width: 36px;
+    height: 20px;
+    background: #ddd;
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+  }
+  .toggle-switch.on { background: var(--rose); }
+  .toggle-switch.on::after { transform: translateX(16px); }
+</style>
+</head>
+<body>
+<div style="background:#3a2a25;padding:10px 24px;display:flex;align-items:center;gap:14px;">
+  <a href="index.html" style="color:#e8c4b8;font-family:Arial,sans-serif;font-size:0.8rem;text-decoration:none;letter-spacing:0.04em;">&larr; Back to Quiz Hub</a>
+  <span style="color:#555;font-size:0.8rem;">|</span>
+  <span style="color:#a09880;font-family:Arial,sans-serif;font-size:0.8rem;">Set 2 &middot; Esthetician State Board</span>
+</div>
+
+
+<header>
+  <h1>✦ Esthetician Board Prep</h1>
+  <div id="score-badge">
+    <span>✓ <b id="hdr-correct">0</b></span>
+    <span>✗ <b id="hdr-wrong">0</b></span>
+  </div>
+</header>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+<main>
+  <!-- Quiz screen -->
+  <div id="quiz">
+    <div class="q-meta">
+      <div class="q-num" id="q-num">Question 1 of 344</div>
+      <div class="q-jump" style="display:flex;align-items:center;gap:6px;">
+        <label class="mode-toggle" onclick="toggleShuffle()">
+          <div class="toggle-switch" id="shuffle-toggle"></div> Shuffle
+        </label>
+        &nbsp;
+        Go to: <input type="number" id="jump-input" min="1" max="344" placeholder="—" onchange="jumpTo(this.value)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="question-text" id="question-text"></div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-skip" onclick="prevQ()">← Back</button>
+      <button class="btn btn-primary" id="next-btn" onclick="nextQ()">Next →</button>
+      <button class="btn btn-secondary" onclick="skipQ()">Skip</button>
+    </div>
+  </div>
+
+  <!-- Summary screen -->
+  <div id="summary">
+    <div class="summary-card">
+      <div class="big-score" id="pct-score">—%</div>
+      <div class="summary-label">Final Score</div>
+      <div class="stats-row">
+        <div class="stat-pill c" id="sum-correct">✓ 0 correct</div>
+        <div class="stat-pill w" id="sum-wrong">✗ 0 wrong</div>
+        <div class="stat-pill s" id="sum-skip">→ 0 skipped</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="restartQuiz()">Try Again</button>
+      <button class="btn btn-secondary" style="width:100%" onclick="reviewWrong()">Review Wrong Answers</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const ALL_QUESTIONS = [
+  { q: "What type of bacteria is in the puss of the blemishes?", choices: ["Staphylococcus","Bacilli","Cork screw shaped bacteria","Microbes"], answer: 0 },
+  { q: "How are the cells from the Epidermis nourished?", choices: ["Through the blood and lymph vessels","Lipides","Through fatty acids","Keratinocytes"], answer: 0 },
+  { q: "What direction do you remove cleanser from a man's face?", choices: ["Downwards","From center to outer edges","Upwards","Sideways"], answer: 2 },
+  { q: "What massage technique do you use to spread moisturizer?", choices: ["Effleurage","Petrissage","Tapotement","Friction"], answer: 0 },
+  { q: "What is the role of silicone in a product?", choices: ["Prevent water escaping from the skin","Enhances preservatives","Binds the ingredients together","It acts as a thickening agent"], answer: 0 },
+  { q: "How does Titanium Dioxide work to protect from the sun?", choices: ["It reflects light","It thickens the skin","It absorbs light","It seals the skin"], answer: 0 },
+  { q: "Which of the following causes the most allergic reaction?", choices: ["Coloring agents","Anti-Aging agents","Emulsifying agents","Fragrance"], answer: 3 },
+  { q: "Where is the adipose tissue found?", choices: ["Sub-cutaneous layer","Stratum granulosum","Epidermis","Dermis"], answer: 0 },
+  { q: "What is the function of the Langerhans cells?", choices: ["To help protect the body from infection","To protect against the Sun","To help build fibers","To produce melanine"], answer: 0 },
+  { q: "What is the layer located below the stratum lucidium?", choices: ["Stratum granulosum","Basal Layer","Stratum Corneum","Adipose Tissue"], answer: 0 },
+  { q: "What is the difference between intrinsic and extrinsic aging?", choices: ["Intrinsic is natural aging, extrinsic is aging caused by sun, alcohol, smoking...etc","Intrinsic is due to environmental influence","Extrinsic is due to nutrition and intrinsic is due to environmental influence","Intrinsic is aging from the outside and extrinsic is from the inside"], answer: 0 },
+  { q: "What is a group of boils called?", choices: ["Carbuncle","Furuncle","Psoriasis","Tinea vesicolor"], answer: 0 },
+  { q: "The ethnicity that ages the least is?", choices: ["Black","Native American","Asian","White"], answer: 0 },
+  { q: "What muscle connects the shoulder to the chin?", choices: ["Platysma","Terporalis","Trapesium","Sterno cleido mastoid"], answer: 0 },
+  { q: "What is eyelash hair?", choices: ["Cilia","Terminal hair","Super-cilia","Milia"], answer: 0 },
+  { q: "What is the function of powder?", choices: ["To set foundation","To preserve the PH of the skin","To Hydrate","To protect from bacteria"], answer: 0 },
+  { q: "The client holds which electrode?", choices: ["Inactive","Active","Negative","Positive"], answer: 0 },
+  { q: "During disincrustation the client holds which electrode?", choices: ["Positive – Anode","Negative","Cathode","Active"], answer: 0 },
+  { q: "Hyperpigmentation is likely to occur on predisposed skin during which treatment?", choices: ["Chemical peels","Exfoliation","High frequency","Galvanic"], answer: 0 },
+  { q: "Lancets should be held at what angle?", choices: ["30°","70°","90°","10°"], answer: 0 },
+  { q: "What is the difference between Telangestasia and Rosacea?", choices: ["Rosacea has inflamed pustule and papules and Telangestasia has only enlarged blood vessels","Rosacea has build up sebum and Telangestasia does not have active oily glands","Telangestasia has pigmentation and Rosacea does not","Rosacea has enlarged pores and Telangestasia does not"], answer: 0 },
+  { q: "Where do you begin removing the cleanser from?", choices: ["Neck","Cheeks","Jaw line","Forehead"], answer: 0 },
+  { q: "What ingredient is both calming and antiseptic?", choices: ["Chamomile","Sandalwood","Grapefruit","Eucalyptus"], answer: 0 },
+  { q: "EPA registered products are what level of infection control?", choices: ["Disinfection","Sanitation","Sterilization","Germicidal"], answer: 0 },
+  { q: "When do you remove hard wax?", choices: ["When it's set","When it is soft","When it's hard","When it's cold"], answer: 0 },
+  { q: "What does the sudoriferous glands excrete?", choices: ["Lactic acid, urea, water","Sweat, sebum, salt","Sebum, oil, urea","Water, sebum, lactic acid"], answer: 0 },
+  { q: "At what pH is acid-balanced?", choices: ["4.5–5.5","0","8.5","1.5–4.0"], answer: 0 },
+  { q: "You are performing a glycolic peel on a client with thin skin. What adverse reaction might they experience if you leave the peel on the maximum time allowed?", choices: ["Burned skin","Dehydrated skin","Hydrated skin","Rough skin"], answer: 0 },
+  { q: "What should you apply before waxing an eyebrow?", choices: ["Powder","Cotton strip","Antibacterial","Astringent"], answer: 0 },
+  { q: "What should be removed before creating an arch in an eyebrow?", choices: ["Makeup","Contact lenses","False eyelashes","Excess hair"], answer: 0 },
+  { q: "A client is attending a party after having lymphatic drainage. What might they experience?", choices: ["Fatigue and dizziness","Nausea and increased urination","Nausea and excess perspiration","Fatigue and disorientation"], answer: 1 },
+  { q: "Your client has dry skin and you are about to moisturize. What ingredient should you look for?", choices: ["Lanolin","Eucalyptus","Zinc oxide","Fuller's earth"], answer: 0 },
+  { q: "What ingredient would be antimicrobial in a mask?", choices: ["Eucalyptus","Rose","Lavender","Ginger"], answer: 0 },
+  { q: "How do you correct deep set eyes?", choices: ["Highlight between and around eyes","Highlight between and darken around","Highlight around eyes and darker between","Darken between and around"], answer: 0 },
+  { q: "The term for study of hair and its functions is?", choices: ["Trichology","Anesthesiology","Cardiology","Urology"], answer: 0 },
+  { q: "How much more alkaline is 9 than 7 on the pH scale?", choices: ["100X","1000X","50X","10X"], answer: 0 },
+  { q: "Scratches and punctures of the surface of the epidermis are called?", choices: ["Excoriations","Fissures","Crusts","Scales"], answer: 0 },
+  { q: "A crack in the dermis is called?", choices: ["Fissure","Excoriation","Furrow","Crust"], answer: 0 },
+  { q: "A condition that would not be indicated for reflexology would be?", choices: ["Diabetes","AIDS","Mature aging skin","High blood pressure"], answer: 0 },
+  { q: "Light skin can be sensitive to waxing but black skin can have what result?", choices: ["Hyperpigmentation","Extremely painful","Hypopigmentation","No feeling"], answer: 0 },
+  { q: "Disincrustation solution is?", choices: ["Highly alkaline","Slightly alkaline","Highly acidic","Slightly acidic"], answer: 0 },
+  { q: "In what layer of the skin are Apocrine glands found?", choices: ["Dermis","Stratum Corneum","Ludicium","Sub-cutaneous"], answer: 0 },
+  { q: "What skin cancer is described as tiny, pearl like lesions?", choices: ["Basal cell carcinomas","Actinic Keratosis","Squamous cell carcinoma","Melanoma"], answer: 0 },
+  { q: "When pulling soft wax from underarm area, you...", choices: ["Pull according to hair growth","Pull one big strip","Pull 2 big areas against hair growth","Pull 3 or more small areas against hair growth"], answer: 3 },
+  { q: "On what type of skin condition should Anaphoresis not be used?", choices: ["Dry","Oily skin with blackheads","Pigmented","Blemished"], answer: 0 },
+  { q: "What arrangement is acceptable as an S.M.A.?", choices: ["Disinfected surface with a EPA registered disinfectant","Wet sanitized","Sanitized white towel","Paper towel"], answer: 0 },
+  { q: "What does Anaphoresis do to the skin?", choices: ["Relaxes and softens","Decreases blood circulation","Stimulates cell growth","Tones the skin"], answer: 0 },
+  { q: "Over use of Alkaline products can cause?", choices: ["Asteatosis","Keratoma","Seborrhea","Hyperkeratosis"], answer: 0 },
+  { q: "Red dry skin patches and flaky skin is a sign of what?", choices: ["Psoriasis","Rosacea","Dehydration","Actinic Keratoses"], answer: 0 },
+  { q: "What do you do in the case of a first-degree burn?", choices: ["Cold compress or immerse in cold water","Send them to a doctor","Bandage in ice","Stop services and ask for help"], answer: 0 },
+  { q: "Which of the following conditions can you perform a service on?", choices: ["Vitiligo","Impetigo","Melanoma","Tinea"], answer: 0 },
+  { q: "If the client has a wheal you?", choices: ["Avoid the area","Extract with disinfected comedone extractor","Ignore and proceed with service","Stop services"], answer: 0 },
+  { q: "How must containers be stored?", choices: ["Properly labeled","Closed cabinet","Lower shelves","Closed"], answer: 0 },
+  { q: "QUATS must be?", choices: ["Bactericidal, Fungicidal, Virucidal","Germicidal, Bactericidal, Fungicidal","Germicidal, Fungicidal, Virucidal","Bactericidal, Germicidal, Virucidal"], answer: 0 },
+  { q: "Which skin condition associated with lesions and dark brown spots should you refer the client to a physician?", choices: ["Melanoma","Asteatosis","Melasma","Edema"], answer: 0 },
+  { q: "What does excessive use of alkaline shaving products do?", choices: ["Makes skin flaky and dry","Exfoliates the skin","Tightens hair follicle","Balances the skin's pH"], answer: 0 },
+  { q: "If a client has an adverse reaction to a product what should be first checked?", choices: ["M.S.D.S","State Boards Rules and Regulations form","The back of the products ingredients list","EPA Registered information"], answer: 0 },
+  { q: "Frequent washing with alkaline products does what?", choices: ["Disturbs the skin's natural defense mechanism","Creates hyperpigmentation","Causes excessive oiliness","Balances the skin's pH"], answer: 0 },
+  { q: "What caustic peel removes the epidermis and dermis?", choices: ["Chloracetic acid","Enzymes","Glycolic acid","Abrasive peels"], answer: 0 },
+  { q: "One of the ingredients to moisten dry skin is?", choices: ["Emollient","Alphahydroxy","Petroleum Jelly","Humectants"], answer: 0 },
+  { q: "Which of the following has calming and soothing effects?", choices: ["Chamomile","Alcohol","Liposomes","Enzymes"], answer: 0 },
+  { q: "When performing a skin analysis prior to a chemical peel, you notice inflamed skin, what do you do?", choices: ["Postpone the service","Work around the inflammation","Proceed with service","Refer them to a physician"], answer: 0 },
+  { q: "When a client has a neck injury, what area should you avoid?", choices: ["Cervical","Occipital","Temporalis","Thorax"], answer: 0 },
+  { q: "When do you cover the eyes with eye pads?", choices: ["When using the dermal light","When doing an eye treatment","When you use magnifying light","When exfoliating with mechanical scrub"], answer: 0 },
+  { q: "How do you extract blackheads?", choices: ["Gloved fingers wrapped with wet cotton","Sanitized comedone extractors","Vacuum machine","Disposable lancets"], answer: 1 },
+  { q: "When a client has recently undergone Blepharoplasty what area should be avoided?", choices: ["The eyes","The lower jaw","The chin","The nose"], answer: 0 },
+  { q: "After a client has had reconstructive surgery what is needed in order to perform a service?", choices: ["A doctor's release form","M.S.D.S","The client release form","Client profile"], answer: 0 },
+  { q: "On what type of skin is peppermint used?", choices: ["Oily","Pigmented","Combination","Dry"], answer: 0 },
+  { q: "On the pH scale, neutral has a pH of?", choices: ["7","1","5","3"], answer: 0 },
+  { q: "What effect does after-shave have on the skin?", choices: ["Balances the skin's pH","Stimulates blood circulation","Softens the skin","Tones and closes the pores"], answer: 3 },
+  { q: "On which of the following can wax be applied over?", choices: ["Nevus","Mole","Scale","Wheel"], answer: 2 },
+  { q: "For what reason should the waxing strip be larger than the area treated?", choices: ["So that you have an easier grip","So that client doesn't experience much pain","In order to pull wax in opposite direction","So that you cover the entire area of applied wax"], answer: 3 },
+  { q: "A clay mask is used on what type of skin?", choices: ["Oily","Inflamed","Pigmentation","Dry mature"], answer: 0 },
+  { q: "At what distance should an infrared be placed from the skin?", choices: ["No less than 24 inches","20 inches","Between 15–20 inches","12 inches or more"], answer: 0 },
+  { q: "At what point during the facial is the skin analyzed?", choices: ["After you cleanse the face","Before you begin the procedure","Before the exfoliation","Before extractions"], answer: 0 },
+  { q: "What disease is characterized with dry or moist lesions?", choices: ["Eczema","Leucoderma","Dermatitis","Hyperkeratosis"], answer: 2 },
+  { q: "Broken capillaries, papules, and pustules are associated with?", choices: ["Rosacea","Furuncle","Edema","Eczema"], answer: 0 },
+  { q: "Why should reflexology not be done to a diabetic client?", choices: ["They have a lack of feeling or sensation in feet","They have low blood circulation","They don't like to be touched","They are extra-sensitive"], answer: 0 },
+  { q: "Stimulation of the sebaceous glands will give what effect?", choices: ["Lubrication","Hypertrophy","Keratoses","Hyperhydrosis"], answer: 0 },
+  { q: "What type of skin tends to make Keloids?", choices: ["Black","Indian","Asian","White"], answer: 0 },
+  { q: "You must not ever massage on?", choices: ["Inflamed acne","Leucoderma","Keloids","Lentigenes"], answer: 0 },
+  { q: "Any wax used on the face or anywhere on the body must be checked for temperature, why?", choices: ["To prevent burn","So it is hot enough to kill the bacteria","To prevent discomfort","To know if it is ready for use"], answer: 0 },
+  { q: "What is a Tertiary Color?", choices: ["Equal amounts of a secondary color and its neighboring primary color","Mixing equal amount of secondary colors","Red, Blue and Purple","Red, Blue and Green"], answer: 0 },
+  { q: "The reticular layer is found in what part of the skin?", choices: ["The Dermis","The Stratum Corneum","The Epidermis and Dermis","The Epidermis"], answer: 0 },
+  { q: "Melanin gives skin what?", choices: ["Pigment","Lymph","Keratin","Lubrication"], answer: 0 },
+  { q: "Another name for Contact Dermatitis is?", choices: ["Dermatitis Venenata","Asteatosis","Dermatitis Keratoma","Keratoses Pilaris"], answer: 0 },
+  { q: "Glass, Rubber and Silk are?", choices: ["Insulators or non-conductors","Implements","Electrodes","Conductors"], answer: 0 },
+  { q: "When using High Frequency where should you start?", choices: ["Side of cheek","Forehead","Chin","Temple"], answer: 1 },
+  { q: "What type of current is used with Galvanic?", choices: ["Direct Current","Energy Current","Alternating Current","Mechanical Current"], answer: 0 },
+  { q: "A suction machine cannot be used on what skin condition?", choices: ["Rosacea","Macule","Lentigenes","Blackheads"], answer: 0 },
+  { q: "Which light rays are considered germicidal?", choices: ["UV Rays","Heat Rays","Fluorescent Rays","Infrared Rays"], answer: 0 },
+  { q: "What is the purpose of High Frequency?", choices: ["Thermal and germicidal","Opening the pores","Closing the pores","Stimulation"], answer: 0 },
+  { q: "Dermabrasion is performed by whom?", choices: ["Doctor","Cosmetologist","Beautician","Esthetician"], answer: 0 },
+  { q: "How far must the steamer be from the client's face?", choices: ["15 to 16 inches","20 to 25 inches","No further than 10 inches","No less than 10 inches"], answer: 0 },
+  { q: "Another name for Couperose is?", choices: ["Telangectasia","Tinea Versicolor","Steatoma","Keratoma"], answer: 0 },
+  { q: "Lemon is used for lightening and brightening as well as?", choices: ["Anti-Bacterial","Germicidal","Fungicidal","Astringent"], answer: 3 },
+  { q: "The Lymphatic drainage massage is used to?", choices: ["Detoxify","Enhance the skin's elasticity","Relaxation","Stimulate blood flow"], answer: 0 },
+  { q: "What is the direction of the massage?", choices: ["From insertion to origin","Towards the flow of the lymph","From origin to insertion","The belly"], answer: 1 },
+  { q: "What type of massage should be done on acne?", choices: ["Petrissage","A light Friction","Effleurage","Friction"], answer: 2 },
+  { q: "What is the process when you use the positive pole on the face?", choices: ["Cataphoresis","Saponification","Anode","Anaphoresis"], answer: 0 },
+  { q: "Humectants are considered:", choices: ["Water magnets","Oil magnets","Atoms","Ions"], answer: 0 },
+  { q: "Washing your hands is an example of?", choices: ["Sanitation","Disincrustation","Disinfection","Sterilization"], answer: 0 },
+  { q: "The blue light must be how far away and for how long on the client's face?", choices: ["10 to 12 inches for 5 minutes","5 to 7 inches for 5 minutes","24 to 30 inches for 10 minutes","24 to 30 inches for 5 minutes"], answer: 0 },
+  { q: "What is the strength of a magnifying light?", choices: ["40 watts","75 watts","50 watts","100 watts"], answer: 0 },
+  { q: "What is the universal solvent?", choices: ["Water","Oil","Baking Soda","QUATS"], answer: 0 },
+  { q: "The effective strength of a disinfectant is?", choices: ["1 to 1000 PPM","1 to 10 PPM","1 to 150 PPM","1 to 100 PPM"], answer: 0 },
+  { q: "Which muscles are involved in bending the wrist?", choices: ["Flexors","Extensor","Deltoid","Triceps"], answer: 0 },
+  { q: "Which muscle is responsible for closing the eye?", choices: ["Orbicularis Oculi","Risorius","Levator Labii","Orbicularis Oris"], answer: 0 },
+  { q: "What is Hyperhidrosis?", choices: ["Excessive perspiration","Lack of hydration","Excessive sebum","Seborrhea"], answer: 0 },
+  { q: "What is plastic surgery of the nose called?", choices: ["Rhinoplasty","Mammaplasty","Blepharoplasty","Rhytidectomy"], answer: 0 },
+  { q: "A mass of Keratinized cells and hardened sebum is?", choices: ["Comedone","Nodule","Macule","Pustule"], answer: 0 },
+  { q: "How do you clean glass electrodes?", choices: ["Immerse in Hospital Grade Disinfectant","Wipe with Anti-Bacterial Soap","Wipe with EPA Registered solution or 10% Cresol","Immerse in QUATS"], answer: 2 },
+  { q: "When applying make-up how do you make something look smaller?", choices: ["Use a dark shade","Use a concealer lighter than skin color","Use a brush","Use a light shade"], answer: 0 },
+  { q: "The pH of the skin is?", choices: ["4.5 to 5.5","0","4.2","6.5"], answer: 0 },
+  { q: "What does the Acid Mantle do?", choices: ["Is the skin's own natural defense mechanism","Controls the skin's elasticity","Protects the skin from excessive humectants","Protects the skin for excessive oils"], answer: 0 },
+  { q: "When applying make-up how do you make something look bigger?", choices: ["Highlight","Use Primary colors","Diminish","Use Secondary colors"], answer: 0 },
+  { q: "Which is the most desirable massage movement?", choices: ["Effleurage","Vibration","Tapotement","Petrissage"], answer: 0 },
+  { q: "If you need to remove your hands from the face during the massage you should?", choices: ["Feather your hands off the forehead very gently","Use the tapotement movement","Quietly tell your client","Quickly remove your fingers"], answer: 0 },
+  { q: "Service should not be refused to a client with?", choices: ["Aids","Inflammation","The Flu","A common cold"], answer: 0 },
+  { q: "You cannot work on clients with the contagious diseases such as?", choices: ["Ringworm","Keloid","Nevus","Macule"], answer: 0 },
+  { q: "What is Verruca?", choices: ["A wart","Pink eye","A liver spot","Birthmark"], answer: 0 },
+  { q: "Clay Masks are?", choices: ["Alkaline","Positively charged","Caustic","Acidic"], answer: 0 },
+  { q: "How do you massage the sides of the neck?", choices: ["With downward movements","With petrissage movements","With circular movements","With upward movements"], answer: 0 },
+  { q: "In what direction do you perform a lymphatic drainage massage?", choices: ["In the direction of the lymph flow","On the motor points","Toward the heart","From insertion to origin"], answer: 0 },
+  { q: "What skin treatment can lemon be used for?", choices: ["Bleaching","Calming and soothing","Anti-aging","Stimulating"], answer: 0 },
+  { q: "If you notice leucoderma on a client you should?", choices: ["Continue the treatment","Avoid the area","Postpone treatment","Refer them to a physician"], answer: 0 },
+  { q: "What is the technical term for freckles?", choices: ["Lentigenes","Melasma","Leucoderma","Vitiligo"], answer: 0 },
+  { q: "What procedures should you apply if irritation appears after a glycolic peel?", choices: ["Neutralize with an alkaline solution","Apply a clay mask","Wash with soap and water","Apply a soothing mask"], answer: 0 },
+  { q: "What type of massage would you perform on skin that is aging and losing its elasticity?", choices: ["Effleurage","Tapotement","Petrissage","Dr. Jacket"], answer: 2 },
+  { q: "How soon after using a depilatory can you wax?", choices: ["Four weeks","Two hours","Three weeks","14 days"], answer: 0 },
+  { q: "Hardened sebum trapped in the follicle is a?", choices: ["Comedone","Cyst","Macule","Papule"], answer: 0 },
+  { q: "Changing ice into water is what kind of change?", choices: ["Physical","Filtration","Distillation","Chemical"], answer: 0 },
+  { q: "What is a hard pearl of sebum in the skin that has no open lesion?", choices: ["Milia","Comedones","Carbuncle","Fissure"], answer: 0 },
+  { q: "Dry, scaly skin is a characteristic of what?", choices: ["Asteatosis","Seborrhea","Anhidrosis","Steatoma"], answer: 0 },
+  { q: "What holds the Stratum Spinosum together?", choices: ["Desmosomes","Melanosomes","Elastine fibers","Collagen fibers"], answer: 0 },
+  { q: "Which of the following is a viral hypertrophy?", choices: ["Verruca","Bulla","Furuncle","Keloid"], answer: 0 },
+  { q: "Which one of the following is a fungal infection of the hands and feet?", choices: ["Tinea","Carbuncle","Verruca","Pediculosis"], answer: 0 },
+  { q: "Cleansing creams are applied using?", choices: ["Fingertips","Brushes","Spatula","Cotton compress"], answer: 0 },
+  { q: "What is the hormone responsible for excessive hair growth?", choices: ["Androgens/Testosterone, male hormone","Thyroid","Estrogen","Pituitary"], answer: 0 },
+  { q: "How many metacarpals are in the palm of the hand?", choices: ["5","4","8","14"], answer: 0 },
+  { q: "Langerhans cells are found in what layer of the skin?", choices: ["Stratum spinosum","Stratum germinativum","Dermis","Adipose layer"], answer: 0 },
+  { q: "What in the epidermis helps fight against pathogens?", choices: ["Langerhans cells","Stratum lucidum","Mast cells","Stratum granulosum"], answer: 0 },
+  { q: "What layer of the skin contains Fibroblast cells?", choices: ["Dermis","Epidermis","Adipose tissue","Stratum corneum"], answer: 0 },
+  { q: "In what phase of the hair growth does a new cycle begin?", choices: ["Anagen","Catagen","Telogen","Hypertrichosis"], answer: 0 },
+  { q: "What muscle is responsible for puckering the lips?", choices: ["Orbicularis oris","Orbicularis oculi","Buccinator","Buccal"], answer: 0 },
+  { q: "What is another name for percussion massage technique?", choices: ["Tapotement","Vibration","Effleurage","Friction"], answer: 0 },
+  { q: "Where is adipose tissue primarily located?", choices: ["Subcutaneous layer","Basal layer","Stratum corneum","Reticular layer"], answer: 0 },
+  { q: "Would you wax over Keratosis pilaris?", choices: ["No","Only with soft wax","Yes","With hard wax only"], answer: 0 },
+  { q: "What skin cancer has red patches?", choices: ["Squamous cell carcinoma","Melanoma","Melanotic sarcoma","Basal cell carcinoma"], answer: 0 },
+  { q: "Which of the following is a product consisting of AHA that removes dead skin cells?", choices: ["Exfoliant","Astringent","Gommage","Paraffin mask"], answer: 0 },
+  { q: "Debris is removed from tools and implements using which of the following procedures?", choices: ["Sterilization","Disinfection","Sanitation","Decontamination"], answer: 2 },
+  { q: "Which is the recommended protocol in proper hand washing technique?", choices: ["Using a paper towel, turn the cold water on","Using a paper towel, turn the cold water on and start lathering with bar soap","Using a paper towel, turn on the warm water and lather and scrub hands with bar soap for 15 seconds","Using a paper towel, turn on the warm water and lather and scrub hands with liquid antibacterial soap"], answer: 3 },
+  { q: "Which is the appropriate sequence of events in the first aid procedure for bleeding?", choices: ["Cover wound, apply pressure, elevate injured limb, apply bandage","Elevate limb, cover wound, apply pressure","Cover wound, elevate limb, apply pressure, use tourniquet","Cover wound, apply pressure, apply bandage, elevate limb"], answer: 0 },
+  { q: "At which point of the client consultation should the skin analysis be performed?", choices: ["While the client is filling out the Personal Skin Evaluation Form","While viewing the Medical History Form","While performing the Professional Skin Evaluation","During a Complimentary Consultation"], answer: 2 },
+  { q: "Many clients may be infected with HIV without having any of the following?", choices: ["Blood tests","Sexual contacts","Potential symptoms","Sharing blood with others"], answer: 2 },
+  { q: "Which product will remove dirt and oil during a facial, while leaving the skin's natural essential moisturizers?", choices: ["Exfoliant","Clay mask","Antiseptic","Cleanser"], answer: 3 },
+  { q: "Which form of exfoliation works by physically removing dead skin cells from 20–30% of the surface of the epidermis?", choices: ["Glycolic acid","Lactic acid","Dermabrasion","Microdermabrasion"], answer: 3 },
+  { q: "Which of the following is a type of cancer that is the most common and easiest to treat?", choices: ["Basal cell","Squamous cell","Malignant melanoma","Actinic keratoses"], answer: 0 },
+  { q: "Which part of the cell is responsible for controlling reproduction, growth, and metabolism?", choices: ["Nucleus","Cytoplasm","Cell membrane","Organelles"], answer: 0 },
+  { q: "In order to create the illusion of fuller lips, where should lip liner be applied?", choices: ["Toward the outer corners of the lips","Just past the outer edge of the lip line","On the upper lip inside the natural shape","Inside the upper and lower lip line"], answer: 1 },
+  { q: "What is the average pH of the skin?", choices: ["4.5–5.5","7","Above 7","Below 4"], answer: 0 },
+  { q: "Product labeling includes which of the following that causes changes in the skin's appearance?", choices: ["Active agents","Functional ingredients","Moisture content","Hypoallergenics"], answer: 0 },
+  { q: "Which of the following skin care products attracts moisture to the skin?", choices: ["Peptides","Retinol","Chelators","Humectants"], answer: 3 },
+  { q: "Which portion of the facial would involve the physical removal of visibly clogged pores?", choices: ["Extraction","Steaming","Saponification","Desincrustation"], answer: 0 },
+  { q: "Which of the following is considered the lowest level of infection control?", choices: ["Sanitation","Universal Precautions","Disinfection","Sterilization"], answer: 0 },
+  { q: "Skin cancers are caused by exposure to which of the following lights?", choices: ["Ultraviolet","Violet ray","Infrared","Blue"], answer: 0 },
+  { q: "Massage movements used on the forehead to relax facial muscles is?", choices: ["Effleurage","Petrissage","Tapotement","Friction"], answer: 0 },
+  { q: "Which disorder of the sebaceous glands is characterized by papules, pustules, and comedones?", choices: ["Acne","Bromidrosis","Psoriasis","Milia"], answer: 0 },
+  { q: "Which facial massage movement has a soothing and relaxing effect?", choices: ["Effleurage","Petrissage","Tapotement","Vibration"], answer: 0 },
+  { q: "Which piece of equipment is also called a loupe?", choices: ["Magnifying lamp","Wood's lamp","Skin scope","Steamer"], answer: 0 },
+  { q: "Cream masks are recommended for which of the following skin types?", choices: ["Dry","Oily","Adult acne","Sun damaged"], answer: 0 },
+  { q: "What type of muscle is responsible for one organ only and functions involuntarily?", choices: ["Cardiac","Striated","Non-striated","Anterior"], answer: 0 },
+  { q: "By highlighting the cheekbone, the area will appear?", choices: ["Emphasized","Diminished","Contoured","Darkened"], answer: 0 },
+  { q: "Which piece of electrical facial equipment is used to soften comedones for easy extractions?", choices: ["Steamer","High frequency","Sprayer","Paraffin heater"], answer: 0 },
+  { q: "Which of the following protects the skin from water loss?", choices: ["Acid mantle","Enzymes","Arrector pili","Hair follicle"], answer: 0 },
+  { q: "Which mask is derived from natural ingredients from the earth and is also commonly used on acne prone skin?", choices: ["Clay/Mud","Gel","Rubberized","Cream"], answer: 0 },
+  { q: "Which skin type exhibits fine lines and lacks sebum?", choices: ["Dry","Normal","Mature/Aging","Dehydrated"], answer: 0 },
+  { q: "Which of the following parts of a cell is responsible for its growth and reproduction?", choices: ["Cytoplasm","Membrane","Nucleus","Organelle"], answer: 2 },
+  { q: "Which of the following may be considered a possible contraindication for chemical peels?", choices: ["Retinoid users","Pacemakers","Varicose veins","Epilepsy"], answer: 0 },
+  { q: "Which face shape is considered the most balanced and symmetric?", choices: ["Oval","Heart","Round","Oblong"], answer: 0 },
+  { q: "How much of the epidermis can be removed with just one microdermabrasion treatment?", choices: ["5–10%","10–20%","20–30%","30–40%"], answer: 2 },
+  { q: "Which piece of equipment relies on high pressure and heat or steam to prevent the survival of microorganisms?", choices: ["Autoclave","Chemiclave","UV light sterilizer","Quaternary ammonium germicidal detergent"], answer: 0 },
+  { q: "Which ingredient is an example of an emollient and prevents moisture loss by creating a protective barrier?", choices: ["Palm oil","Glycerin","Stearic acid","Sodium lauryl sulfate"], answer: 0 },
+  { q: "Virucidal properties must be included in a chemical product used for which infection control procedure?", choices: ["Disinfection","Cleaning","Sterilization","Decontamination"], answer: 0 },
+  { q: "Which form of hair removal involves the use of a muslin strip?", choices: ["Soft wax","Hard wax","Sugaring","Chemical depilatory"], answer: 0 },
+  { q: "Which type of tissue moves body parts?", choices: ["Muscular","Nerve","Connective","Epithelial"], answer: 0 },
+  { q: "Which of the following is an example of sensitive skin with dilated blood vessels that can benefit from soothing treatments?", choices: ["Rosacea","Psoriasis","Eczema","Milia"], answer: 0 },
+  { q: "The size of a product's container, the aroma or a specific ingredient of the product are its?", choices: ["Features","Benefits","Promotions","Market trends"], answer: 0 },
+  { q: "What a product will do to enhance the appearance or improve the condition of the client's skin are the product's?", choices: ["Benefits","Features","Promotions","Common goals"], answer: 0 },
+  { q: "A skin care center should keep all records of daily sales and services for at least?", choices: ["Six months","One week","Nine months","One year"], answer: 3 },
+  { q: "One-celled microorganisms that are either disease-producing or nondisease producing are called?", choices: ["Bacteria","Virus","Parasites","Immunity"], answer: 0 },
+  { q: "Head lice, itch mites, ringworm and nail fungus are all diseases caused by?", choices: ["External parasites","Infection","Internal parasites","Bloodborne pathogens"], answer: 0 },
+  { q: "A contagious disease refers to a disease that is?", choices: ["Easily spread from one person to another","Vaccinated","Immunized","Not spread from one person to another"], answer: 0 },
+  { q: "All of the following could indicate an allergic reaction to latex EXCEPT?", choices: ["Virus","Hives","Itching","Swelling"], answer: 0 },
+  { q: "The second level of infection control that does not eliminate bacterial spores is called?", choices: ["Disinfection","Efficacy","Sanitation","Contamination"], answer: 0 },
+  { q: "All of the following items used in the skin care center can be properly disinfected EXCEPT?", choices: ["Sponges and disposable files","Lancets and tweezers","Probes and extractors","Tweezers and extractors"], answer: 0 },
+  { q: "Tools and instruments used to puncture or invade the skin must be sterilized or?", choices: ["Disposable","Sanitized","Disinfected","Immunized"], answer: 0 },
+  { q: "What are Bromelain and Papain?", choices: ["Enzymes","Hydroxy acids","Vitamins","Antioxidants"], answer: 0 },
+  { q: "What is the difference between Squamous cell carcinoma and Basal cell carcinoma?", choices: ["Basal cell carcinomas are common malignant lesions","Basal cell carcinomas are less common than Squamous cell carcinomas","Basal cell carcinoma is the most dangerous skin growth","Squamous cell carcinomas are not dangerous"], answer: 0 },
+  { q: "How do you extract comedones and pimples?", choices: ["Apply downward pressure on either side of the impaction at the base","Apply pressure on top of the impaction","Apply strong pressure all around the impaction","Apply an acidic solution to prepare for extractions"], answer: 0 },
+  { q: "Where can pathogenic bacteria be found?", choices: ["Everywhere in our environment and inside the body","On the contaminated surfaces only","On the contaminated implements only","Everywhere in the air and water base products"], answer: 0 },
+  { q: "What are free radicals?", choices: ["Chemically unstable molecules, caused by environmental pollutants and UV exposure","Fatty acids that have been exposed to Hydrogen","Organic ingredients that bind water and deposit it into the skin","Binding substances used to slow down destruction of a product"], answer: 0 },
+  { q: "What is the last step one should take in the hair removal process?", choices: ["Apply medicated lotion to the entire area","Apply talcum powder","Remove excess wax with oil","Cleanse the area"], answer: 0 },
+  { q: "Which cells found in the Dermis layer are responsible for the production of Collagen and Elastin?", choices: ["Fibroblast Cells","Langerhans Cells","Mast Cells","Merkel Cells"], answer: 0 },
+  { q: "In which of the skin layers is collagen and elastin produced?", choices: ["Dermis","Epidermis","Stratum Germinativum","Papillary Layer"], answer: 0 },
+  { q: "What is the function of the liver?", choices: ["Discharges bile and removes the toxic by-products of digestion","Supplies nutrients to the body","Eliminates water and waste products","None of the above"], answer: 0 },
+  { q: "What is the mass of epidermal cells forming a small tube-like depression in the skin or scalp called?", choices: ["Sebaceous gland","Hair Follicle","Catagen","Papilla"], answer: 1 },
+  { q: "What mask contains a special crystal of gypsum, a plaster-like ingredient that warms the skin?", choices: ["Modelage or Thermal mask","Paraffin mask","Alginate","Gommage"], answer: 0 },
+  { q: "What mask warms the skin, increases circulation and promotes penetration of the ingredients applied underneath?", choices: ["Paraffin mask","Alginate mask","Clay mask","Custom designed"], answer: 0 },
+  { q: "What are bloodborne pathogens?", choices: ["Bloodborne pathogens are transmitted through blood and body fluids and cause infectious diseases","Microorganisms that are carried in blood to prevent viral and bacterial diseases","A virus known to cause Herpes Simplex","External parasites"], answer: 0 },
+  { q: "A strong protein substance that makes up approximately 70% of Dermis is?", choices: ["Collagen","Epidermis","Keratin","Muscles"], answer: 0 },
+  { q: "What massage movement is considered another form of friction?", choices: ["Chucking","Fulling","Vibrating","Hacking"], answer: 0 },
+  { q: "What is the color of High frequency for sensitive skin?", choices: ["Orange","Blue","Violet","Red and blue"], answer: 2 },
+  { q: "Most allergic reactions are caused by what?", choices: ["Fragrance","Mineral oils","Muds and clays","Silicones"], answer: 0 },
+  { q: "Which Cells recognize the Antigens and assist in destroying them?", choices: ["T-cells","Melanocytes","Desmosomes","Merkel Cells"], answer: 0 },
+  { q: "After treating and recommending products to clients, the esthetician should?", choices: ["Clean up","Rebook appointment","Record recommended products onto treatment card","Set up for the next client"], answer: 2 },
+  { q: "Which foundation tone do you choose for cool, light skin?", choices: ["Pink undertones","Ash undertones","Yellow undertones","Pink and Yellow undertones"], answer: 0 },
+  { q: "What is it called when an esthetician 'double dips' and uses the same spatula?", choices: ["Cross Contamination","Sanitation","Universal Precautions","Infection Control"], answer: 0 },
+  { q: "What is the last step in the hair removal process?", choices: ["Remove excess wax with oil","Apply medicated lotion to entire area","Apply antiseptic and soothing lotion to calm skin","Cleanse the area"], answer: 2 },
+  { q: "Which system is the physical foundation of the body?", choices: ["Muscular","Skeletal System","Reproductive system","Endocrine system"], answer: 1 },
+  { q: "The condition when you do not sweat or perspire is called?", choices: ["Keratosis Polaris","Staphylococcus","Asteatosis","Anhidrosis"], answer: 3 },
+  { q: "Enzyme peels are used on these clients EXCEPT?", choices: ["Sensitized skin","Clients with an open lesion","Acne prone skin","Mature skin"], answer: 1 },
+  { q: "What type of products should you stay away from when a client has a hypoallergenic reaction to shellfish?", choices: ["Peanut oil","Avocado oil","Marine products","Pollen derived products"], answer: 2 },
+  { q: "What cancer has irregular, crusted and red papules?", choices: ["Squamous cell carcinoma","Malignant growth","Vitiligo","Melanoma"], answer: 0 },
+  { q: "What exfoliating creme product is applied to skin that dries and sloughs away dead skin cells?", choices: ["Gel","Paraffin","Clay","Gommage"], answer: 3 },
+  { q: "What area of the eyebrows do you tweeze?", choices: ["Between the brows","The arch","Underneath and between the brows","None of the above"], answer: 2 },
+  { q: "What system is the physical foundation of the body and stores calcium?", choices: ["Skeletal system","Muscular system","Reproductive system","Endocrine system"], answer: 0 },
+  { q: "What condition can cause redness and bumpiness on arms?", choices: ["Rosacea","Acne","Keratosis Pilaris","Eczema"], answer: 2 },
+  { q: "What is Accutane and what is it used for?", choices: ["Prescribed treatment for severe cases of Acne Grade 3 and Grade 4","An ingredient used to dry and exfoliate which aids in killing bacteria","An acid that promotes drying and cell turnover","An acne treatment that dries the skin and promotes rapid exfoliation"], answer: 0 },
+  { q: "Why is distilled or filtered water used in a steamer?", choices: ["To stimulate skin and sebaceous glands","To prevent mineral buildup","To thoroughly cleanse skin","To produce an antibacterial effect"], answer: 1 },
+  { q: "What is a bloodborne pathogen?", choices: ["Virus known to cause Herpes Simplex","Bacterial microorganisms that are carried in blood and can cause disease in people","Microorganisms that are carried in blood to prevent viral and bacterial diseases","None of the above"], answer: 1 },
+  { q: "What electrical modality utilizes low amperage and produces an electrochemical effect?", choices: ["Galvanic Current","Sinusoidal Current","Faradic Current","Tesla Current"], answer: 0 },
+  { q: "What is the primary function of powder when applying make up?", choices: ["To contour the face","To conceal the under eyes","To highlight the face","To set foundation"], answer: 3 },
+  { q: "What color of high frequency is used for sensitive skin?", choices: ["Pink red","Yellow orange","Neon","Violet ray"], answer: 3 },
+  { q: "Excess fluid in the body, produced by inflammation is?", choices: ["Edema","Erythema","Hyperemia","Irritation"], answer: 0 },
+  { q: "What exfoliation should you do on inflamed acne?", choices: ["Superficial enzymes","Jojoba beads","Strong chemical peels","Exfoliators with grains"], answer: 0 },
+  { q: "What is the term used to describe color schemes using colors directly across from each other?", choices: ["Complementary","Monochromatic","Analog","Tertiary"], answer: 0 },
+  { q: "The final step in the exfoliation process is?", choices: ["SPF","Vitamin C serum","Toner","Moisturizer"], answer: 3 },
+  { q: "Before performing a treatment on someone with impetigo you need?", choices: ["Doctor's release form","The lesion to have a scab","Cover the wound","Cleanse the face"], answer: 0 },
+  { q: "What do you do when a client has Hirsutism?", choices: ["You recommend hair removal services","You recommend camouflage make-up","Do not perform any services","You recommend cold compresses"], answer: 0 },
+  { q: "Which of the following treatments should not be performed if the client is prone to seizures?", choices: ["Light Therapy and Microcurrent","Chemical treatments","Masks","Massage"], answer: 0 },
+  { q: "Alipidic skin is?", choices: ["Small follicles lacking oil","Large follicles lacking water","Normal follicles with pustules","Normal follicles"], answer: 0 },
+  { q: "What peel is a contraindication for having an ibuprofen allergy?", choices: ["Salicylic acid","Mandelic acid","Glycolic acid","Lactic acid"], answer: 0 },
+  { q: "After finishing extractions, what procedure is next to remove fluid contaminated items?", choices: ["Aseptic procedure","Sanitation procedure","Blood borne pathogen procedure","Cross contamination procedure"], answer: 0 },
+  { q: "When applying eyelashes, what is the best way to reduce adverse effects?", choices: ["Non tinted, clear adhesive","Single lash application","Strip lash application","Pharmaceutical grade adhesive"], answer: 0 },
+  { q: "What sun rays are the most harmful?", choices: ["UVA","UVB","Direct sunlight","Infrared"], answer: 0 },
+  { q: "What is the only method that kills bacteria spores?", choices: ["Sterilization","Sanitation","TB disinfection","Virucidal disinfection"], answer: 0 },
+  { q: "Which company certifies the safety of pedicure chairs and hair dryers?", choices: ["Underwriters Laboratories","National Standards Institute","General Electric Corporation","Intertek Testing Services"], answer: 0 },
+  { q: "Which is the product used to physically remove dead cell buildup?", choices: ["Mechanical exfoliants","Astringents","Couperose","Chemical exfoliants"], answer: 0 },
+  { q: "When muscles become fatigued during a service, your client will benefit from all of the following EXCEPT?", choices: ["Occipitalis pinch","Phalange pull","Temple massage","Shoulder massage"], answer: 0 },
+  { q: "What should be used to apply powders and lotions?", choices: ["Cotton puff","Spatula","Makeup brush","Tissue"], answer: 0 },
+  { q: "Which hair length requires trimming before performing a waxing service?", choices: ["1 inch long","1/2 inch long","1/8 inch long","1/4 inch long"], answer: 0 },
+  { q: "Which of the following is the FIRST step in preparing the client for a facial wax?", choices: ["Place a hair cap or headband on the client's head","Cleanse the area thoroughly with a mild cleanser","Dry the client's face","Remove the client's makeup"], answer: 3 },
+  { q: "All of the following are massage manipulations EXCEPT?", choices: ["Circulation","Effleurage","Tapotement","Friction"], answer: 0 },
+  { q: "Which of the following is a chemical germicide formulated to use on the skin?", choices: ["Antiseptic","Bleach","Disinfectant","Quat solution"], answer: 0 },
+  { q: "All of the following are considered corrective skin conditions EXCEPT?", choices: ["Skin tone","Comedones","Dryness","Oiliness"], answer: 0 },
+  { q: "Which of the following should be used to treat an allergy of the skin?", choices: ["Lotions","Antiseptic","Soap and water","Isopropyl alcohol"], answer: 2 },
+  { q: "Chemical safety includes all the following EXCEPT?", choices: ["Use of products in unlabeled containers","Ensuring there is adequate ventilation","Proper storage and disinfectant solutions","Reading manufacturer labels and directions before use"], answer: 0 },
+  { q: "What MUST a new client do before their first service is performed?", choices: ["Complete a consultation form","Schedule next appointment","Fill out an emergency contact card","Pay for service"], answer: 0 },
+  { q: "What tissue supports and protects the body?", choices: ["Connective","Muscular","Nerve","Epithelial"], answer: 0 },
+  { q: "Between clients, after sanitizing your SMA and changing linens, you should also?", choices: ["Clean and sanitize your bottles","Clean and sanitize the floor","Fumigate the room","Empty your trash and sanitize the trash receptacle"], answer: 3 },
+  { q: "What can you put on the skin to prevent TEWL?", choices: ["Occlusive/Ointment","Enzymes","UV protection","Moisturizer"], answer: 0 },
+  { q: "After extractions, what should you apply to the skin?", choices: ["Moisturizer","Antiseptic","SPF product","Spa guidelines"], answer: 1 },
+  { q: "What is the outer structure of the cell?", choices: ["Cell membrane","Nucleus","Mitochondria","Dendrites"], answer: 0 },
+  { q: "What is the skin's first line of defense for pathogens?", choices: ["Langerhans cells","Mast cells","Adipose layer","Melanin"], answer: 0 },
+  { q: "The skin needs direct sunlight to stimulate what?", choices: ["Vitamin D","Vitamin A","Collagen","Vitamin C"], answer: 0 },
+  { q: "What colors are opposite the primary colors?", choices: ["Secondary colors","Cool colors","Warm colors","Tertiary colors"], answer: 0 },
+  { q: "Where should you point the steamer when you first turn it on?", choices: ["Away from the client","Towards the floor","Towards the ceiling","Away from the products trolley"], answer: 0 },
+  { q: "What is the technical term for prickly heat?", choices: ["Miliaria rubra","Eczema","Dermatitis","Psoriasis"], answer: 0 },
+  { q: "Which cells are the first line of defense on the body?", choices: ["Stratum corneum/horny layer","Dermis","Stratum granulosum","Red blood cells"], answer: 0 },
+  { q: "Which pH level should a 30% Glycolic chemical peel not go below?", choices: ["3","2","5","7"], answer: 0 },
+  { q: "All of the following are information contained on the Material Data Safety Sheet EXCEPT?", choices: ["Retail products","Flammability warnings","Hazardous ingredients","Safe handling and use procedures"], answer: 0 },
+  { q: "What is the proper way to wash hands?", choices: ["Wet, lather, scrub, rinse and dry","Run water until hot over the hands","Rinse, lather, dry","Apply lotion, scrub 20 seconds, rinse, dry"], answer: 0 },
+  { q: "A client comes in for an eyebrow wax and you notice several infected ingrown hairs. What do you do?", choices: ["Use hard wax","Do not perform the service and tell the client to come back in a week","Use tweezers to pull the infected hairs","Use soft wax"], answer: 1 },
+  { q: "A client comes in for a facial wax and tells you they have been treating their melasma with quinone lotion. What do you do?", choices: ["Do not perform the service","Spread the wax in the direction of the hair growth","Pluck the hair with tweezers instead","Place a thin coating of lotion on the face before waxing"], answer: 0 },
+  { q: "What color does hyperpigmentation reflect under the Wood's lamp?", choices: ["Brown","Orange","Yellowish","Black"], answer: 1 },
+  { q: "What do you use to remove products from containers?", choices: ["Non porous disinfected item","Porous sterile item","Fingers","Brushes"], answer: 0 },
+  { q: "Washing hands is what level of infection control?", choices: ["Cleaning","Disinfection","Sterilization","Preventing infection"], answer: 0 },
+  { q: "What is toner used for?", choices: ["To balance the pH of the skin","Heals blemishes","To cleanse the skin","To firm the skin"], answer: 0 },
+  { q: "When does the client talk about their skin concerns?", choices: ["During consultation","During skin analysis","Skin chat form","The end of the facial"], answer: 0 },
+  { q: "What must you not go over with wax?", choices: ["Mole","Birth mark","Freckle","Macule"], answer: 0 },
+  { q: "What would you do if a person with severe acne comes for a facial?", choices: ["Refer to a physician","Give a basic facial to clean skin","Extract acne before acne facial","Diagnose and give acne facial"], answer: 0 },
+  { q: "Disinfection solution used by licensee must have a registration number and must be approved by?", choices: ["Environmental protection agency","Occupational Safety and Health Administration","Drug and Food Administration","Consumer Affairs"], answer: 0 },
+  { q: "A permanent hair removal method is?", choices: ["Electrolysis","Tweezing","Waxing","Epilation"], answer: 0 },
+  { q: "What is a method used to eliminate or reduce the transmission of infectious organisms from one individual to another?", choices: ["Infection Control","Sterilization","Standard precaution","Sanitization"], answer: 0 },
+  { q: "What destroys all microbial life?", choices: ["Sterilization","Disinfection","Sanitization","Cleaning"], answer: 0 },
+  { q: "What is mostly used to remove visible dirt?", choices: ["Cleaning","Sanitization","Sterilization","Disinfection"], answer: 0 },
+  { q: "Which of the following are beauty and wellness professionals permitted and encouraged to do?", choices: ["Refer customers with infections and abnormal conditions to physicians","Treat abnormal conditions","Treat infections","Recommend treatments for infections and abnormal conditions"], answer: 0 },
+  { q: "Which of the following is true of rules and regulations?", choices: ["They are more specific than laws","They are less specific than laws","They are also referred to as statuses","They are just the same as laws"], answer: 0 },
+  { q: "Prevention of the spread of infections begins and ends with who?", choices: ["You","Doctors","Clients","Infectious Materials"], answer: 0 },
+  { q: "To understand transmissions is to understand what?", choices: ["The process by which pathogens move between individuals","The process by which the spread of infections are controlled or suppressed","The process by which diseases become infectious","The process by which individuals are cured of sicknesses"], answer: 0 },
+  { q: "What happens when an individual's immune system prevents transmissions?", choices: ["It prevents illness","It causes illness","It prevents the spread of disease","It spreads disease"], answer: 0 },
+  { q: "Which of the following is true of nonpathogenic and pathogenic bacteria?", choices: ["Pathogenic bacteria are harmful to humans, whereas nonpathogenic bacteria are not","Both pathogenic and nonpathogenic bacteria are harmful to humans","Nonpathogenic bacteria are harmful to humans, whereas pathogenic bacteria are not","Neither pathogenic nor nonpathogenic bacteria are harmful to humans"], answer: 0 },
+  { q: "It can be accurately said that pathogenic bacteria can?", choices: ["Cause disease or infection","Help the body break down food","Keep the body healthy","Positively stimulate the immune system"], answer: 0 },
+  { q: "What is the presence of pus a sign of?", choices: ["Bacterial Infection","Nonpathogenic organisms","Inflammation","Contagious Disease"], answer: 0 },
+  { q: "A disease that spreads from one person to another is always what?", choices: ["Communicable","Systemic","Deadly","Nonpathogenic"], answer: 0 },
+  { q: "If you get sick as a result of overexposure to chemicals at the workplace, what has happened?", choices: ["You have contracted an occupational disease","You have contracted a parasitic disease","You have contracted a pathogenic disease","You have contracted a diagnosed disease"], answer: 0 },
+  { q: "Disease-causing microorganisms carried in the body by blood or body fluids, such as hepatitis and HIV, are called?", choices: ["Bloodborne pathogens","Systemic Infections","Bloodborne viruses","Mycobacteria"], answer: 0 },
+  { q: "Which of the following is the second step of infection control?", choices: ["Disinfecting","Cleaning","Sterilization","Elimination"], answer: 0 },
+  { q: "The process of disinfection eliminates what?", choices: ["Most microorganisms","A very small amount of microorganisms","No microorganisms","All microorganisms"], answer: 0 },
+  { q: "How long must a tool be left fully submerged in disinfectant if no time is specified by the manufacturer?", choices: ["10 minutes","10 seconds","10 hours","1 hour"], answer: 0 },
+  { q: "Quats solutions usually take how long to disinfect implements?", choices: ["10 minutes","10 hours","1 hour","10 seconds"], answer: 0 },
+  { q: "Tuberculosis is transmitted through what?", choices: ["Inhalation","Direct transmission into the bloodstream","Touching an infected object","Close contact with an infected person"], answer: 0 },
+  { q: "Bleach used in the salon or spa must be EPA registered as which of the following?", choices: ["A disinfectant","A carcinogen","A pathogen","A sterilizer"], answer: 0 },
+  { q: "Clients who are just getting sick can be contagious without showing signs — they are considered to be?", choices: ["Asymptomatic","Precautious","Sanitized","Antiseptic"], answer: 0 },
+  { q: "Beauty and wellness professionals should change their gloves when?", choices: ["After every single use","After every other use","In between each client","Every single day"], answer: 0 },
+  { q: "After removing one pair of gloves and before putting on a new pair, you should do what?", choices: ["Wash their hands","Do nothing","Change their mask","Change their clothes"], answer: 0 },
+  { q: "Before applying warm towels to a client's face, where should you first test the water temperature?", choices: ["On the inside of your wrist","On the client's forehead","On the client's hand","On your hand"], answer: 0 },
+  { q: "If you drop a tool on the floor during a service, you should do what?", choices: ["Either replace the tool immediately or disinfect the tool prior to continuing the service","Immediately throw the implement or tool in the garbage","Quickly pick it up and continue if the client does not see","Immediately stop the service and ask your client to come back"], answer: 0 },
+  { q: "Exits in salons and spas should NOT be what?", choices: ["Randomly located at the owner's discretion","Identifiable","Well-marked","Known to all employees"], answer: 0 },
+  { q: "Which of the following is True of fire extinguishers?", choices: ["They must, by law, be checked regularly","They can be stored anywhere, as long as they are out of the way","They must be replaced annually","They should not be stored near other chemicals"], answer: 0 },
+  { q: "What is the name for a chemical substance spread on the skin to dissolve the hair at the surface of the skin?", choices: ["Depilatory","Thermolysis","Gum rosin","Epilatory"], answer: 0 },
+  { q: "The only technique categorized by the FDA and the AMA as permanent hair removal is what?", choices: ["Electrolysis","Depilation","Laser hair removal","Intense pulsed light (IPL)"], answer: 0 },
+  { q: "Which two services use strips for removal?", choices: ["Soft waxing and spatula-applied sugaring","Hard waxing and soft waxing","Hard waxing and spatula-applied sugaring","Soft waxing and hand-applied sugaring"], answer: 0 },
+  { q: "What part of the body is usually preferable for those of soft wax?", choices: ["The legs","The labia","The Axilla","Any area that needs a second application during the service"], answer: 0 },
+  { q: "When should a client release form be signed?", choices: ["At the start of every appointment","Only before first consultation","Before each new procedure within an appointment","At the end of every appointment"], answer: 0 },
+  { q: "Who may NOT receive a wax treatment?", choices: ["A client who is allergic to fruit","A client who has been prescribed Retin-A","A client who takes aspirin daily","Anyone under the age of 18"], answer: 1 },
+  { q: "What setting of the rotating brush is good for sensitive skin during the facial?", choices: ["Slow","Pulsing","Medium","Fast"], answer: 0 },
+  { q: "What is considered a disinfectant?", choices: ["Household Bleach","Antibacterial Soap","Water","Astringent"], answer: 0 },
+  { q: "What skin type is also a skin condition?", choices: ["Couperose","Sensitive","Mature","Oily"], answer: 1 },
+  { q: "What solution is used for desincrustation treatment?", choices: ["Acid Solution","Alkaline Solution","Neutral","Water"], answer: 1 },
+  { q: "What type of toner is formulated for acne or oily skin?", choices: ["Water","Fresheners","Astringent","Plant based"], answer: 2 },
+  { q: "What is an alcohol free toner used to soothe skin called?", choices: ["Enzyme","Astringent","Micellar water","Freshener"], answer: 3 },
+  { q: "If a client with sensitive skin is unable to receive a glycolic peel, what suitable peel would you recommend?", choices: ["TCA peel","Microdermabrasion","Enzyme peel","Salicylic Peel"], answer: 2 },
+  { q: "What is a boil called that is a disorder of the hair follicle?", choices: ["Bacteria","Fungi","Furuncle","Pus"], answer: 2 },
+  { q: "What chemical causes a reaction to metal?", choices: ["Bleach","Astringent","Alcohol","Water"], answer: 2 },
+  { q: "What procedure is used to reduce contamination with proper handling of disinfected or sterile tools and equipment?", choices: ["Infection control procedure","Washing with soap and water","Cleaning","Aseptic procedure"], answer: 3 },
+];
+
+const LETTERS = ['A','B','C','D'];
+let order = [];
+let current = 0;
+let answered = 0;
+let correct = 0;
+let wrong = 0;
+let skipped = 0;
+let results = {};
+let shuffle = false;
+let wrongList = [];
+let reviewMode = false;
+
+function initOrder() {
+  order = ALL_QUESTIONS.map((_, i) => i);
+  if (shuffle) order = order.sort(() => Math.random() - 0.5);
+}
+
+function startQuiz() {
+  current = 0; answered = 0; correct = 0; wrong = 0; skipped = 0;
+  results = {}; wrongList = []; reviewMode = false;
+  initOrder();
+  document.getElementById('summary').classList.remove('show');
+  document.getElementById('quiz').style.display = '';
+  renderQ();
+}
+
+function renderQ() {
+  const total = order.length;
+  const idx = order[current];
+  const q = ALL_QUESTIONS[idx];
+
+  document.getElementById('q-num').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('progress-fill').style.width = `${((current)/total)*100}%`;
+  document.getElementById('question-text').textContent = q.q;
+
+  const cDiv = document.getElementById('choices');
+  cDiv.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.innerHTML = `<span class="letter">${LETTERS[i]}</span><span>${c}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    if (results[idx] !== undefined) {
+      btn.classList.add('disabled');
+      if (i === q.answer) btn.classList.add(results[idx] === q.answer ? 'correct' : 'reveal-correct');
+      if (i === results[idx] && results[idx] !== q.answer) btn.classList.add('wrong');
+    }
+    cDiv.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  if (results[idx] !== undefined) {
+    if (results[idx] === q.answer) {
+      fb.className = 'feedback correct-fb show';
+      fb.textContent = '✓ Correct!';
+    } else {
+      fb.className = 'feedback wrong-fb show';
+      fb.textContent = `✗ Incorrect. The correct answer is: ${q.choices[q.answer]}`;
+    }
+  }
+
+  document.getElementById('next-btn').textContent = current === total - 1 ? 'Finish' : 'Next →';
+  updateHeader();
+}
+
+function selectAnswer(i) {
+  const idx = order[current];
+  if (results[idx] !== undefined) return;
+  const q = ALL_QUESTIONS[idx];
+  results[idx] = i;
+  answered++;
+
+  const choices = document.querySelectorAll('.choice');
+  choices.forEach(c => c.classList.add('disabled'));
+
+  const fb = document.getElementById('feedback');
+  if (i === q.answer) {
+    correct++;
+    choices[i].classList.add('correct');
+    fb.className = 'feedback correct-fb show';
+    fb.textContent = '✓ Correct!';
+  } else {
+    wrong++;
+    wrongList.push(idx);
+    choices[i].classList.add('wrong');
+    choices[q.answer].classList.add('reveal-correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.textContent = `✗ Incorrect. The correct answer is: ${q.choices[q.answer]}`;
+  }
+  updateHeader();
+}
+
+function nextQ() {
+  if (current === order.length - 1) {
+    showSummary(); return;
+  }
+  current++;
+  renderQ();
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+function skipQ() {
+  const idx = order[current];
+  if (results[idx] === undefined) skipped++;
+  if (current < order.length - 1) { current++; renderQ(); }
+  else showSummary();
+}
+
+function jumpTo(val) {
+  const n = parseInt(val);
+  if (!isNaN(n) && n >= 1 && n <= order.length) {
+    current = n - 1;
+    renderQ();
+    document.getElementById('jump-input').value = '';
+  }
+}
+
+function toggleShuffle() {
+  shuffle = !shuffle;
+  document.getElementById('shuffle-toggle').classList.toggle('on', shuffle);
+}
+
+function updateHeader() {
+  document.getElementById('hdr-correct').textContent = correct;
+  document.getElementById('hdr-wrong').textContent = wrong;
+}
+
+function showSummary() {
+  document.getElementById('quiz').style.display = 'none';
+  const total = answered;
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+  document.getElementById('pct-score').innerHTML = `${pct}<span>%</span>`;
+  document.getElementById('sum-correct').textContent = `✓ ${correct} correct`;
+  document.getElementById('sum-wrong').textContent = `✗ ${wrong} wrong`;
+  document.getElementById('sum-skip').textContent = `→ ${skipped} skipped`;
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('summary').classList.add('show');
+}
+
+function restartQuiz() {
+  startQuiz();
+}
+
+function reviewWrong() {
+  if (wrongList.length === 0) return;
+  order = [...wrongList];
+  current = 0; answered = 0; correct = 0; wrong = 0; skipped = 0;
+  results = {}; wrongList = []; reviewMode = true;
+  document.getElementById('summary').classList.remove('show');
+  document.getElementById('quiz').style.display = '';
+  renderQ();
+}
+
+startQuiz();
+</script>
+</body>
+</html>

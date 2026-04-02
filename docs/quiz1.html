@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Set 1 - Health & Public Safety</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#f5f0e8;--card:#fffdf8;--dark:#1c1a15;--mid:#5a5448;--accent:#2a5470;--accent2:#b5451b;--correct:#2d6a4f;--wrong:#b5451b;--border:#ddd8cc;}
+body{font-family:Georgia,serif;background:var(--bg);color:var(--dark);min-height:100vh;}
+.back-bar{background:var(--dark);padding:10px 24px;display:flex;align-items:center;gap:14px;}
+.back-bar a{color:#e8c4b8;font-family:Arial,sans-serif;font-size:0.8rem;text-decoration:none;letter-spacing:0.04em;}
+.back-bar a:hover{color:white;}
+.back-bar span{color:#555;font-size:0.8rem;}
+header{background:var(--dark);color:#f5f0e8;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:10;}
+header h1{font-size:1.2rem;font-weight:700;}
+header p{font-size:0.76rem;color:#a09880;margin-top:2px;font-family:Arial,sans-serif;}
+.hc{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.cf{display:flex;gap:5px;flex-wrap:wrap;}
+.cb{background:transparent;border:1px solid #3a3830;color:#a09880;padding:4px 12px;border-radius:20px;font-family:Arial,sans-serif;font-size:0.73rem;cursor:pointer;}
+.cb.active{background:var(--accent);border-color:var(--accent);color:white;}
+.cb:hover:not(.active){border-color:#666;color:#ccc;}
+.br{background:var(--accent2);color:white;border:none;padding:6px 14px;border-radius:20px;font-family:Arial,sans-serif;font-size:0.76rem;font-weight:bold;cursor:pointer;}
+.pw{background:#eee9dc;padding:8px 28px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:9;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.pbo{flex:1;height:5px;background:#d5cfc4;border-radius:4px;overflow:hidden;}
+.pbi{height:100%;background:var(--accent);border-radius:4px;transition:width 0.4s;width:0%;}
+.pt{font-size:0.73rem;color:var(--mid);white-space:nowrap;min-width:110px;text-align:right;font-family:Arial,sans-serif;}
+.sb{background:var(--dark);color:#f5f0e8;border-radius:12px;padding:2px 10px;font-size:0.73rem;font-weight:bold;white-space:nowrap;font-family:Arial,sans-serif;}
+main{max-width:740px;margin:0 auto;padding:28px 16px 80px;}
+.cd{margin:28px 0 14px;display:flex;align-items:center;gap:12px;}
+.cd h2{font-size:1rem;color:var(--dark);white-space:nowrap;}
+.cd::after{content:"";flex:1;height:1px;background:var(--border);}
+.qc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,0.06);}
+.qh{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.qn{background:var(--dark);color:#f5f0e8;font-size:0.66rem;font-weight:bold;border-radius:5px;padding:2px 7px;white-space:nowrap;margin-top:2px;font-family:Arial,sans-serif;}
+.qt{font-size:0.91rem;line-height:1.5;font-weight:bold;}
+.opts{display:flex;flex-direction:column;gap:6px;}
+.opt{display:flex;align-items:center;gap:10px;padding:9px 13px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;background:white;font-size:0.86rem;font-family:Arial,sans-serif;user-select:none;}
+.opt:hover:not(.answered){background:#eee9dc;border-color:#bbb5a8;}
+.ol{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:bold;flex-shrink:0;color:var(--mid);}
+.opt.correct{background:#edf7f1;border-color:var(--correct);}
+.opt.correct .ol{background:var(--correct);border-color:var(--correct);color:white;}
+.opt.wrong{background:#fdecea;border-color:var(--wrong);}
+.opt.wrong .ol{background:var(--wrong);border-color:var(--wrong);color:white;}
+.opt.sc{background:#edf7f1;border-color:var(--correct);}
+.opt.sc .ol{background:var(--correct);border-color:var(--correct);color:white;}
+.opt.answered{cursor:default;}
+.fb{margin-top:8px;font-size:0.79rem;font-weight:bold;padding:6px 12px;border-radius:5px;display:none;font-family:Arial,sans-serif;}
+.fb.correct{display:block;color:var(--correct);background:#edf7f1;}
+.fb.wrong{display:block;color:var(--wrong);background:#fdecea;}
+#sum{display:none;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px;text-align:center;margin-top:32px;}
+#sum h2{font-size:1.6rem;margin-bottom:8px;}
+.bs{font-size:3rem;color:var(--accent);line-height:1;margin:12px 0;}
+#sum p{color:var(--mid);font-size:0.88rem;font-family:Arial,sans-serif;}
+.rbt{margin-top:20px;display:inline-block;background:var(--dark);color:#f5f0e8;border:none;padding:10px 26px;border-radius:22px;font-family:Arial,sans-serif;font-size:0.84rem;font-weight:bold;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="back-bar"><a href="index.html">&larr; Back to Quiz Hub</a><span>|</span><span style="color:#a09880;">Set 1 &middot; Health &amp; Public Safety</span></div>
+<header>
+  <div><h1>Health &amp; Public Safety</h1><p>Chapters 4&ndash;7 &nbsp;&middot;&nbsp; 190 Questions</p></div>
+  <div class="hc">
+    <div class="cf">
+      <button class="cb active" onclick="fc('all',this)">All</button>
+      <button class="cb" onclick="fc(4,this)">Ch 4</button>
+      <button class="cb" onclick="fc(5,this)">Ch 5</button>
+      <button class="cb" onclick="fc(6,this)">Ch 6</button>
+      <button class="cb" onclick="fc(7,this)">Ch 7</button>
+    </div>
+    <button class="br" onclick="rq()">&#9674; Randomize</button>
+  </div>
+</header>
+<div class="pw"><div class="pbo"><div class="pbi" id="pb"></div></div><div class="pt" id="pt">0 / 0 answered</div><div class="sb" id="sc">Score: 0%</div></div>
+<main id="qz"></main>
+<div id="sum"><h2>Quiz Complete!</h2><div class="bs" id="fs"></div><p id="ft"></p><button class="rbt" onclick="rs()">Try Again</button></div>
+<script>
+var Q=[{ch:4,q:"What is true of water?",o:["You should only drink water after you exercise.","It can be refreshing but is not necessary for the body's health.","It is the one essential nutrient no person can live without.","You should only drink water when it is hot outside."],a:2},
+{ch:4,q:"It is beneficial for beauty professionals to have a working knowledge of nutrition because ___.",o:["your license doubles as a dietician license","good nutrition is necessary for healthy skin, hair, and nails","you will be tested heavily on nutrition at your practical exams","you will be tested heavily on nutrition on your written exams"],a:1},
+{ch:4,q:"The ___ is the governmental agency that issues the recommended nutritional guideline MyPlate.",o:["Centers for Disease Control and Prevention","Federal Trade Commission","United States Department of Agriculture","Food and Drug Administration"],a:2},
+{ch:4,q:"To keep the body healthy, you must be sure that what you eat helps to ___.",o:["prevent hydration","cause fatigue","delay the rate of aging","regulate the overall function of your cells"],a:3},
+{ch:4,q:"A 2 percent drop in ___ can trigger fuzzy short-term memory, trouble with basic math, and difficulty focusing.",o:["body water","body fat","weight","client rebooking"],a:0},
+{ch:4,q:"___ aids in and accelerates the skin's healing processes and is vitally important in fighting the aging process.",o:["Vitamin A","Vitamin C","Vitamin D","Vitamin E"],a:1},
+{ch:4,q:"In a nutrition context, RDA stands for ___.",o:["recommending diet authority","reoccurring diarrhea ailment","retroactive dietary allotment","recommended daily allowance"],a:3},
+{ch:4,q:"One of the best ways to follow a healthy diet is to read ___.",o:["magazine articles","food labels","diet blogs","legal guidelines"],a:1},
+{ch:4,q:"___ are the nutrients needed for energy to run every function within the body.",o:["Vitamins","Proteins","Carbohydrates","Fats"],a:2},
+{ch:4,q:"The USDA recommends that people eat ___.",o:["no salt","large amounts of sugar","moderate amounts of salt and sugar","only animal-based fats"],a:2},
+{ch:4,q:"Vitamins are considered ___.",o:["nutritional requirements","nutritional supplements","cosmetic ingredients","medications"],a:1},
+{ch:4,q:"Water makes up ___ percent of the body's weight and is necessary for virtually every function of the cells and body.",o:["10 to 20","20 to 30","30 to 50","50 to 70"],a:3},
+{ch:4,q:"Lack of water is the principal cause of ___.",o:["daytime fatigue","daytime hunger","daytime mood swings","daytime memory loss"],a:0},
+{ch:4,q:"A 180-pound person needs about ___ 8-ounce glasses of water a day for maximum physical health.",o:["eight","nine","eleven","eighteen"],a:2},
+{ch:4,q:"___ is important for maintaining a healthy immune system.",o:["Eating a restricted diet","Getting adequate sleep","Smoking tobacco products","Taking antibiotics"],a:1},
+{ch:4,q:"When prescribed antibiotics, you should ___.",o:["only take them while your symptoms persist","avoid wearing latex gloves","be informed that they only work on viral infections","complete the full course of treatment"],a:3},
+{ch:4,q:"If you are ___ or experiencing vomiting or diarrhea, you should stay home from work.",o:["running a fever","excessively sleepy","having an allergic reaction","hungover"],a:0},
+{ch:4,q:"Rather than using your hands, sneeze into ___ when on the job.",o:["a jar of disinfectant","the inside of your wrists","your elbow","the air above your head"],a:2},
+{ch:4,q:"___ is highly effective at reducing the spread of illness-causing bacteria.",o:["UV sanitization","Air conditioning","Protective equipment","Vitamin E"],a:0},
+{ch:4,q:"___ is a common source of overexposure allergies among beauty professionals.",o:["LED lighting","Fragrance in products","The use of lotion","Smoking"],a:1},
+{ch:4,q:"It is important to ___ your hands after taking off used gloves.",o:["immediately re-glove","change the bandages on","apply lotion or cream to","wash and thoroughly dry"],a:3},
+{ch:4,q:"Hydrogen peroxide should ___ on an open cut.",o:["always be used","never be used","be used sparingly","first be diluted when used"],a:3},
+{ch:4,q:"A ___ test should be used prior to a service if your client is on antibiotics.",o:["drug","patch","resistance","blood"],a:1},
+{ch:4,q:"The way to counter the negative impact of repetitive motions or long periods in one position is by ___.",o:["stretching and walking around at intervals","wearing new expensive shoes","practicing regular body manipulation","being aware of the body's vascular system"],a:0},
+{ch:4,q:"Your shoulders should be relaxed and ___ when you are providing client services.",o:["slightly hunched","level","slightly arched","extended"],a:1},
+{ch:4,q:"The science of designing the workplace and its equipment to make body movements more comfortable efficient and safe is called ___.",o:["economics","ergonology","ergonomics","ecology"],a:2},
+{ch:4,q:"Your shoes should have a low heel and have ___.",o:["good arch support","a tight fit","a soft sole","a loose fit"],a:0},
+{ch:4,q:"As you work your neck should be ___.",o:["bent over the client","elongated and balanced above the shoulders","leaning toward your dominant hand","properly braced at all times"],a:1},
+{ch:4,q:"One goal of ergonomics is to make workplace tools safer and more ___.",o:["attractive","flexible","economical","efficient"],a:3},
+{ch:4,q:"An awareness of your posture and ___ coupled with good work habits and equipment will enhance your health and comfort.",o:["height","weight","movements","activity"],a:2},
+{ch:4,q:"As you work you should hold your elbows at no more than a ___-degree angle from your body for extended periods.",o:["15","25","60","90"],a:2},
+{ch:4,q:"Your wrists should be kept in a ___ position as much as possible when you work.",o:["straight or neutral","upright","bent","downward"],a:0},
+{ch:4,q:"Repetitive motions have a cumulative effect on the muscles and ___.",o:["bones","joints","tendons","skins"],a:2},
+{ch:4,q:"To avoid ergonomic-related injuries consider using ___.",o:["a back brace","knee braces","an anti-fatigue mat","a heated body wrap"],a:2},
+{ch:4,q:"Which of the following can prevent fatigue and many other physical problems?",o:["good posture","movement therapies","repetitive motions","physical therapy"],a:0},
+{ch:4,q:"To sit correctly in a balanced position your back should be ___.",o:["arched","straight","in constant motion","parallel to your feet"],a:1},
+{ch:4,q:"What type of shoe is not safe to wear around electrical tools and sharp implements?",o:["sneakers","closed toed","open toed","boots"],a:2},
+{ch:4,q:"___ when lifting.",o:["Exhale","Inhale","Hold your breath","Move quickly"],a:1},
+{ch:4,q:"When working on a client's hands ___.",o:["reach across to your client","have your client reach across to you","sit beside your client","lean over your client from behind"],a:2},
+{ch:4,q:"You should ___ if you are pregnant trying to get pregnant or working with a pregnant client.",o:["avoid chemical procedures","stay away from pedicure bowls","invest in more sensible shoes","pay attention to chemical labels"],a:3},
+{ch:5,q:"Federal and state agencies regulate the beauty and wellness professions. State agencies ___.",o:["set guidelines for use of equipment","regulate licensing","set guidelines for the manufacturing","monitor safety in the workplace"],a:1},
+{ch:5,q:"What standards address issues relating to your right to know about potentially hazardous ingredients contained in products?",o:["OSHA standards","CDC standards","EPA standards","SDS standards"],a:0},
+{ch:5,q:"___ establish specific standards of conduct and can be changed or updated frequently.",o:["Regulations","Laws","Statues","Rules"],a:0},
+{ch:5,q:"What agency registers all types of disinfectants sold and used in the United States?",o:["CDC","OSHA","U.S. Department of Labor","EPA"],a:3},
+{ch:5,q:"Laws are written by ___.",o:["state boards","federal and state legislatures","regulatory agencies","health departments"],a:1},
+{ch:5,q:"Which of the following are chemical products that destroy most bacteria fungi and viruses on surfaces?",o:["disinfectants","sanitizers","cleansers","sterilizers"],a:0},
+{ch:5,q:"Both federal and state laws require that manufacturers supply a(n) ___ for all chemical products manufactured and sold.",o:["Globally Harmonized System of Classification and Labeling of Chemicals System","EPA list","Safety Data Sheet","Hazard Communication Standard"],a:2},
+{ch:5,q:"___ disinfectant is an example of a tuberculocidal disinfectant.",o:["Nonpathogenic","Quaternary ammonium","Single use","Phenolic"],a:3},
+{ch:5,q:"Disinfection is not effective against ___.",o:["bacterial spores","bacteria","viruses","molds"],a:0},
+{ch:5,q:"What type of bacteria are harmful microorganisms that can cause disease or infection in humans when they invade the body?",o:["nonpathogenic","pathogenic","infectious","parasitic"],a:1},
+{ch:5,q:"A disinfectant that is fungicidal is capable of destroying ___.",o:["parasites","viruses","bacteria","molds"],a:3},
+{ch:5,q:"Which of the following is a mechanical process using soap and water or detergent and water?",o:["sanitizing","sterilizing","cleaning","disinfecting"],a:2},
+{ch:5,q:"An inflammation is characterized by ___.",o:["redness heat pain and/or swelling","red papules or spots","coughing or sneezing","blood poisoning"],a:0},
+{ch:5,q:"Which of the following are single-celled microorganisms that have both plant and animal characteristics?",o:["fungus","parasite","bacteria","virus"],a:2},
+{ch:5,q:"Which of the following is capable of replication only through taking over the host cell's reproductive function?",o:["bacteria","virus","fungi","mold"],a:1},
+{ch:5,q:"Staph bacteria are responsible for ___.",o:["common colds","chicken pox","influenza","food poisoning"],a:3},
+{ch:5,q:"A common contagious disease that would prevent a professional from servicing a client would be ___.",o:["blood poisoning","Lyme disease","ringworm","tetanus"],a:2},
+{ch:5,q:"What type of infection is it where the pathogen has distributed itself throughout the body rather than staying in one area?",o:["systemic","communicable","contagious","local"],a:0},
+{ch:5,q:"What bacterial infection without proper treatment can become systemic and have devastating consequences that can result in death?",o:["Lyme disease","pneumonia","MRSA","strep throat"],a:2},
+{ch:5,q:"One action of the biofilm community is to resist ___.",o:["pathogens and recognize infection","conventional treatments such as antibiotics","infection","the body's defense mechanisms"],a:1},
+{ch:5,q:"Which of the following keep the body in a chronic inflammatory state that is painful and inhibits healing?",o:["bacterial strains","biofilms","contagious diseases","communicable diseases"],a:1},
+{ch:5,q:"The presence of pus is a sign of a ___ infection.",o:["bacterial","parasitic","viral","biofilm"],a:0},
+{ch:5,q:"Which of the following can prevent viruses from growing in the body?",o:["virucidal disinfectant","antibiotics","standard precautions","vaccinations"],a:3},
+{ch:5,q:"In the salon spa or barbershop the spread of bloodborne pathogens is possible whenever ___.",o:["someone sneezes","the skin is broken","someone coughs","you do not wash your hands"],a:1},
+{ch:5,q:"Hepatitis is a bloodborne virus that causes disease and can damage what body organ?",o:["kidney","lungs","heart","liver"],a:3},
+{ch:5,q:"Which of the following bloodborne viruses can live on a surface outside the body for long periods of time?",o:["HIV","tinea barbae","hepatitis","AIDS"],a:2},
+{ch:5,q:"AIDS is a disease that breaks down the body's ___ system.",o:["immune","nervous","endocrine","cardiovascular"],a:0},
+{ch:5,q:"___ is the process that destroys all microbial life including spores.",o:["Sanitizing","Sterilization","Disinfecting","Cleaning"],a:1},
+{ch:5,q:"Disinfectants are ___ and can be harmful if absorbed through the skin.",o:["pesticides","germicides","antiseptics","pathogens"],a:1},
+{ch:5,q:"Effective sterilization typically requires the use of a(n) ___.",o:["countertop receptacle","UV light unit","heat lamp","autoclave"],a:3},
+{ch:5,q:"The vast majority of contaminants and pathogens can be removed from the surfaces of tools through proper ___.",o:["sterilization","disinfection","cleaning","sanitizing"],a:2},
+{ch:5,q:"The time listed on the product label for the disinfectant to be visibly moist to be effective against pathogens is called ___ time.",o:["dilution","contact","efficacy","concentrate"],a:1},
+{ch:5,q:"What should you never mix with bleach?",o:["detergents","water","disinfectants","pesticides"],a:0},
+{ch:5,q:"An item must remain submerged in the disinfectant for ___ unless the product label specifies differently.",o:["2 hours","30 minutes","10 minutes","1 hour"],a:2},
+{ch:5,q:"Which of the following are a form of formaldehyde have a very high pH and can damage the skin and eyes?",o:["petroleum distillates","quaternary ammonium compounds","bleaches","phenolic disinfectants"],a:3},
+{ch:5,q:"Bleach must be stored away from ___.",o:["metals and plastics","heat and light","kerosene","water"],a:1},
+{ch:5,q:"Which of the following are known carcinogens?",o:["distillates","quats","phenolics","bleaches"],a:2},
+{ch:5,q:"___ do not disinfect or sterilize.",o:["Liquid disinfecting solutions","Autoclaves","Quats","UV light units"],a:3},
+{ch:5,q:"Towels linens and capes that are not thoroughly dried may grow ___.",o:["microbes","viruses","bacteria","parasites"],a:2},
+{ch:5,q:"___ has been linked in recent years to disfiguring infections associated particularly with pedicure bowls.",o:["Hepatitis","Biofilm","Human papilloma virus","Mycobacterium"],a:3},
+{ch:5,q:"What is one of the most important actions you can take to prevent spreading germs from one person to another?",o:["using an antibacterial soap","using proper hand washing","using an antimicrobial soap","using a moisturizing hand lotion"],a:1},
+{ch:5,q:"Antiseptics generally contain a high volume of ___.",o:["alcohol","formaldehyde","sodium hypochlorite","ammonium"],a:0},
+{ch:5,q:"Which of the following works well as an antiseptic?",o:["phenolic disinfectant","quaternary ammonium compound","hydrogen peroxide","petroleum distillate"],a:2},
+{ch:5,q:"Which of the following can be irritating to the lungs if you inhale the fumes?",o:["bleach","alcohol","detergents","antiseptics"],a:0},
+{ch:5,q:"In most instances clients who are infected with the hepatitis B virus or other bloodborne pathogens are ___.",o:["symptomatic","asymptomatic","not contagious","under treatment"],a:1},
+{ch:5,q:"When washing your hands use liquid soaps in pump containers because ___ can grow in bar soaps.",o:["bacteria","viruses","parasites","mold"],a:0},
+{ch:5,q:"What type of incident is contact with nonintact skin blood body fluid or potentially infectious materials resulting from a worker's duties?",o:["accident","injury","hazard","exposure"],a:3},
+{ch:5,q:"Should you accidentally cut a client your first action should be to ___.",o:["place your tools in a container designated for cleaning and disinfection","wash your hands","stop the service immediately","disinfect your workstation"],a:2},
+{ch:5,q:"Sharp disposables should be disposed of in ___.",o:["a sharps container","a plastic storage bag","a double-bagged trash bag","the regular trash"],a:0},
+{ch:5,q:"Clients with impaired immune systems are at ___ risk of infection should they encounter pathogens.",o:["decreased","the same","high","very high"],a:3},
+{ch:5,q:"Water heaters should not be set at higher than ___ degrees Fahrenheit.",o:["75","100","130","150"],a:2},
+{ch:5,q:"As a precaution you should always test the water temperature ___ before applying to a client's hair or scalp.",o:["with your fingertips","on the inside of your wrist","on the back of your hand","on your forearm"],a:1},
+{ch:5,q:"Tangled cord syndrome can lead to ___ hazards.",o:["tripping","organization","choking","fire"],a:3},
+{ch:5,q:"Your clothing should be ___.",o:["tight","excessively baggy","comfortable","loose fitting"],a:2},
+{ch:5,q:"When working on children how should you hold your client?",o:["tightly","loosely","with your palms only","gently but firmly"],a:3},
+{ch:5,q:"All employees should be instructed in ___ use.",o:["disinfectant","fire extinguisher","hydraulic chair","implement"],a:1},
+{ch:5,q:"As a beauty professional your most important responsibility is to ___.",o:["protect your clients health and safety","keep your license current","not take shortcuts for disinfecting","be knowledgeable"],a:0},
+{ch:5,q:"As a beauty professional you should be aware of your environment so that you can eliminate ___.",o:["the transmission of infectious organisms","pathogenic bacteria","potential hazards","emergencies"],a:2},
+{ch:5,q:"It is important to wear ___ while disinfecting nonelectrical tools and implements.",o:["safety glasses and gloves","nonskid rubber sole shoes","a gown","a mask"],a:0},
+{ch:5,q:"Never ___ chemicals unless specified in the manufacturer's instructions.",o:["reuse","rebottle","mix","use gloves with"],a:2},
+{ch:5,q:"Blood may carry ___ so you should never touch an open sore or a wound.",o:["chemicals","pathogens","toxic substances","potential hazards"],a:1},
+{ch:5,q:"When handling an exposure incident once your hands are clean you should immediately ___.",o:["stop the service","put on gloves","apologize for the incident","clean the cut with an antiseptic"],a:3},
+{ch:5,q:"You should remove all ___ from your tools and implements before washing.",o:["contaminated objects","grease or oil","traces of solution or soap","visible debris"],a:3},
+{ch:5,q:"A(n) ___ is the invasion of body tissues by disease-causing pathogens.",o:["infection","contamination","disinfection","fission"],a:0},
+{ch:5,q:"Pathogenic bacteria viruses or fungi cannot enter the body through which of the following?",o:["the nose","intact skin","inflamed skin","the mouth"],a:1},
+{ch:5,q:"___ are poisonous substances produced by some microorganisms such as bacteria and viruses.",o:["Antitoxins","Allergens","Pathogens","Toxins"],a:3},
+{ch:5,q:"The CDC requires autoclaves be tested monthly. The accepted method is called a ___ test.",o:["performance","steam","spore","control"],a:2},
+{ch:5,q:"Disinfectants used in salons and spas should be effective for cleaning blood and body fluids from ___ surfaces.",o:["environmental","nonporous","countertop","porous"],a:1},
+{ch:5,q:"The most common way contagious infections spread is through ___.",o:["inhalation","water","intact skin","dirty hands"],a:3},
+{ch:5,q:"The body prevents and controls infections through which of the following?",o:["antitoxins","taste buds","compromised skin","red blood cells"],a:0},
+{ch:6,q:"Which of the following is defined as anything that occupies space and has mass?",o:["atoms","molecules","matter","elements"],a:2},
+{ch:6,q:"There are 118 different elements known to science today. How many are naturally occurring on Earth?",o:["116","98","50","76"],a:1},
+{ch:6,q:"Which of the following are the basic building blocks of all matter?",o:["electrons","protons","molecules","atoms"],a:3},
+{ch:6,q:"The letter H stands for the element ___.",o:["Hydrogen","Hydroxide","Hydrophilic","Helium"],a:0},
+{ch:6,q:"An example of an elemental molecule is ___.",o:["hydrogen peroxide","common table salt","water","the oxygen in air"],a:3},
+{ch:6,q:"As the basic unit of matter ___ cannot be divided into simpler substances by ordinary chemical means.",o:["molecules","oxygen","atoms","water"],a:2},
+{ch:6,q:"Rusting iron and burning wood are examples of a change in what type of properties?",o:["chemical","physical","mechanical","electrical"],a:0},
+{ch:6,q:"An example of a physical change is ___.",o:["rusting iron","ice melting to water","burning wood","oxidation"],a:1},
+{ch:6,q:"An example of a chemical change is ___.",o:["water changing to ice","ice melting to water","the oxidation of haircolor products","temporary haircolor"],a:2},
+{ch:6,q:"Which of the following is an example of a pure substance?",o:["concrete","salt","powder","salt water"],a:1},
+{ch:6,q:"___ also known as alkalis are compounds of hydrogen a metal and oxygen.",o:["Oxides","Salts","Acids","Bases"],a:3},
+{ch:6,q:"A ___ is a stable uniform mixture of two or more mixable substances made by dissolving one substance in another.",o:["suspension","solvent","solution","solute"],a:2},
+{ch:6,q:"Which of the following allows oil and water to mix or emulsify by reducing surface tension?",o:["surfactant","suspension","emulsion","solution"],a:0},
+{ch:6,q:"An example of a water-in-oil emulsion is ___.",o:["calamine lotion","mayonnaise","witch hazel","cold cream"],a:3},
+{ch:6,q:"___ are examples of emulsions used in beauty services.",o:["Powders","Shampoos and conditioners","Astringents","Soaps"],a:1},
+{ch:6,q:"The tail of a surfactant molecule is ___ or oil loving.",o:["miscible","immiscible","lipophilic","hydrophilic"],a:2},
+{ch:6,q:"Nail polish with glitter that can separate from the polish is an example of a(n) ___.",o:["emulsion","mixture","solution","suspension"],a:3},
+{ch:6,q:"Water-in-oil emulsions feel ___ than oil-in-water emulsions.",o:["greasier","hotter","wetter","colder"],a:0},
+{ch:6,q:"___ is the ingredient used to raise the pH in hair products to allow the solution to penetrate the hair shaft.",o:["Amino acid","Ammonia","An alkaline solution","Alpha hydroxy acid"],a:1},
+{ch:6,q:"Volatile organic compounds contain ___ and evaporate very easily.",o:["carbon","hydrogen","oxygen","nitrogen"],a:0},
+{ch:6,q:"___ is the chemical reaction that combines a substance with oxygen to produce an oxide.",o:["Combustion","Ionization","Reduction","Oxidation"],a:3},
+{ch:6,q:"The pH scale is ___.",o:["arithmetic","logarithmic","mathematic","linear"],a:1},
+{ch:6,q:"A(n) ___ charged ion is called an anion.",o:["positively","neutrally","negatively","naturally"],a:2},
+{ch:6,q:"The pH scale measures the concentration of hydrogen ions in acidic and alkaline ___.",o:["unstable","hydrogen peroxide","liquid","water-based"],a:3},
+{ch:6,q:"What does a pH below 7 indicate?",o:["a logarithmic solution","an alkaline solution","an acidic solution","a neutral solution"],a:2},
+{ch:6,q:"The letters pH denote ___ which is the relative degree of acidity or alkalinity of a substance.",o:["potential hydrogen","potential hydroxide","partial hydrogen","partially hydrophilic"],a:0},
+{ch:6,q:"Nonaqueous solutions such as alcohol or oil do not have ___.",o:["mass","pH","their own distinct physical and chemical properties","volume or shape"],a:1},
+{ch:6,q:"What is the average pH for hair and skin?",o:["3.5","5","7.5","9"],a:1},
+{ch:6,q:"Acidic solutions tend to ___ the hair.",o:["swell","harden","soften","relax"],a:1},
+{ch:6,q:"___ refers to either the loss of oxygen or the addition of hydrogen.",o:["Application","Reduction","Reaction","Oxidation"],a:1},
+{ch:6,q:"When oxygen is combined with a substance the substance is ___.",o:["oxidized","reduced","united","blended"],a:0},
+{ch:6,q:"Oxidation and reduction always occur simultaneously and are referred to as a(n) ___ reaction.",o:["rapid oxidation","endothermic","redox","exothermic"],a:2},
+{ch:6,q:"What type of chemical reaction requires the absorption of energy or heat from an external source?",o:["endothermic","acid-alkali neutralization","exothermic","redox"],a:0},
+{ch:6,q:"What type of chemical reaction balances pH and results in the production of water and a salt?",o:["endothermic","acid-alkali neutralization","exothermic","redox"],a:1},
+{ch:6,q:"The SDS contains ___ categories of information.",o:["10","12","14","16"],a:3},
+{ch:6,q:"On a Safety Data Sheet what category includes routes of exposure symptoms and acute and chronic effects?",o:["physical and chemical properties","ecological information","toxicology information","stability and reactivity"],a:2},
+{ch:6,q:"As part of the SDS categories first-aid measures include important symptoms/effects as well as ___.",o:["product use","required treatment","use restrictions","containment and clean-up"],a:1},
+{ch:6,q:"On Safety Data Sheets emergency procedures protective equipment and proper methods of containment and cleanup are listed as ___.",o:["accidental release measures","first-aid measures","exposure controls/personal protection","toxicology information"],a:0},
+{ch:6,q:"As part of the SDS categories handling and storage lists precautions for safe handling and storage including ___.",o:["incompatibilities","ingredients","reactions","identifiers"],a:0},
+{ch:6,q:"The location you use for mixing chemicals must be ___.",o:["unlocked at all times","well ventilated","kept at 98 degrees Fahrenheit","accessible only to managers"],a:1},
+{ch:7,q:"The movement of electrons from one atom to another along a conductor is called ___.",o:["an electric charge","electricity","energy flow","sparks"],a:1},
+{ch:7,q:"Electric wires can be covered with a material that does not transmit electricity such as rubber or plastic. This material is known as a(n) ___.",o:["insulator","conductor","circuit","fuse"],a:0},
+{ch:7,q:"An apparatus that changes direct current to alternating current is a(n) ___.",o:["rectifier","circuit breaker","inverter","fuse box"],a:2},
+{ch:7,q:"The term ___ current refers to a rapid and interrupted current flowing first in one direction and then in the opposite direction.",o:["rectified","alternating","active","direct"],a:1},
+{ch:7,q:"The unit that measures the pressure or force that pushes the electric current forward through a conductor is a(n) ___.",o:["amp","watt","ohm","volt"],a:3},
+{ch:7,q:"Which unit measures the resistance of an electric current?",o:["ohm","watt","amp","volt"],a:0},
+{ch:7,q:"The device that prevents excessive current from passing through a circuit is called a(n) ___.",o:["fuse","battery","kilowatt","ampere"],a:0},
+{ch:7,q:"A switch that automatically interrupts or shuts off an electric current at the first indication of an overload is a(n) ___.",o:["voltage regulator","ampere interrupter","circuit breaker","battery charger"],a:2},
+{ch:7,q:"The negative electrode of an electrotherapy device is called a(n) ___.",o:["anode","electron","carbide","cathode"],a:3},
+{ch:7,q:"Grounding completes a(n) ___ and carries the current safely away.",o:["electric charge","electric circuit","electron flow","microcurrent"],a:1},
+{ch:7,q:"All of the electrical appliances you use should ___.",o:["be battery operated","be UL certified","have a two-prong plug","be used near water"],a:1},
+{ch:7,q:"When using ___ current the active electrode is the electrode used on the area to be treated.",o:["alternating","direct","electric","galvanic"],a:1},
+{ch:7,q:"Microcurrent can be used to ___ and restore elasticity.",o:["decrease metabolism","increase muscle tone","reduce lymph","prevent acidic reactions"],a:1},
+{ch:7,q:"A wavelength is the distance between successive peaks of ___ waves.",o:["electric","electromagnetic","galvanic","infrared"],a:1},
+{ch:7,q:"Invisible light is the light at either end of the ___ that is invisible to the naked eye.",o:["electromagnetic spectrum","spectrum of radiance","radiation spectrum","visible spectrum of light"],a:0},
+{ch:7,q:"Ultraviolet A (UVA) light ___.",o:["is often used in tanning beds","has the shortest wavelength","is often called the burning light","is blocked by the ozone layer"],a:0},
+{ch:7,q:"Catalysts are substances that speed up ___ reactions.",o:["chemical","acidic","alkaline","photoxic"],a:0},
+{ch:7,q:"Constant and direct current that produces chemical changes when it passes through tissues and fluids of the body is known as ___ current.",o:["galvanic","alternating","direct","high frequency"],a:0},
+{ch:7,q:"___ is an extremely low level of electricity that mirrors the body's natural electrical impulses.",o:["Minicurrent","Microcurrent","Milliampere","Biocurrent"],a:1},
+{ch:7,q:"The thermal or heat-producing current with a high rate of oscillation commonly used for scalp and facial treatments is called ___ current.",o:["Tesla alternating","ultraviolet","burning","Tesla high-frequency"],a:3},
+{ch:7,q:"For safety use no more than ___ plug(s) in each outlet.",o:["one","two","three","four"],a:1},
+{ch:7,q:"The application of UV light must be done with utmost care because overexposure can lead to skin ___.",o:["allergies and irritation","damage and cancer","dryness and scaling","overporosity and sanguinity"],a:1},
+{ch:7,q:"The unit that measures how much electric energy is being used in one second is a(n) ___.",o:["ohm","volt","watt","ampere"],a:2},
+{ch:7,q:"If you see sparks when plugging or unplugging an appliance ___.",o:["fix it yourself immediately","do not use the appliance or outlet until approved","try a different outlet","let it rest and then try again later"],a:1},
+{ch:7,q:"Electric ___ refers to the flow of electricity along a conductor.",o:["resistance","insulation","current","circuitry"],a:2},
+{ch:7,q:"Which of the following is considered a good conductor?",o:["rubber","cement","silk","tap water"],a:3},
+{ch:7,q:"You should disconnect an appliance by ___.",o:["pulling on the cord","stepping on the cord","pulling on the plug","twisting the plug"],a:2},
+{ch:7,q:"You should not touch ___ while using an electrical appliance.",o:["rubber","metal","glass","plastic"],a:1},
+{ch:7,q:"___ is the process that introduces water-soluble products into the skin.",o:["Iontophoresis","Desincrustation","Catabolism","Anaerobics"],a:0},
+{ch:7,q:"Which light rays are blocked by the ozone layer?",o:["visible light","UVB rays","UVC rays","infrared light"],a:2},
+{ch:7,q:"Within the visible spectrum of light ___ has the shortest wavelength and ___ has the longest.",o:["yellow; red","violet; red","yellow; green","violet; indigo"],a:1},
+{ch:7,q:"What light is known as cold light or actinic light?",o:["electromagnetic","visible","infrared","ultraviolet"],a:3},
+{ch:7,q:"Direct current is produced by ___ means.",o:["physical","chemical","mechanical","photovoltaic"],a:1},
+{ch:7,q:"An appliance rated at 12 amps must have a cord that is ___ as thick as one rated at 6 amps.",o:["half","just","twice","four times"],a:2},
+{ch:7,q:"The electricity in your house is measured in ___ per hour.",o:["kilowatts","megawatts","kilovolts","milliamps"],a:0},
+{ch:7,q:"A(n) ___ is designed to detect currents of few milliamperes and trip a breaker to remove shock hazard.",o:["UL","GFI","MRI","UVB"],a:1},
+{ch:7,q:"Which of these is not a modality used in beauty and wellness services?",o:["Tesla high-frequency current","microcurrent","integrated current","galvanic current"],a:2},
+{ch:7,q:"Anaphoresis ___.",o:["softens tissues","closes the pores","contracts blood vessels","produces acidic reactions"],a:3},
+{ch:7,q:"Remove lint from clothes dryers before each load to ___.",o:["save electricity","reduce the chance of fire","avoid mildew","better dry clothes"],a:1},
+{ch:7,q:"When should you seek medical care after an electrical shock?",o:["if you were touching metal with your other hand","if your appliance's cords are frayed or tangled","if a client witnessed the shock","if you are pregnant"],a:0}];
+var L=["A","B","C","D"];
+var CT={4:"Chapter 4 — The Healthy Professional",5:"Chapter 5 — Infection Control",6:"Chapter 6 — Chemistry & Chemical Safety",7:"Chapter 7 — Electricity & Electrical Safety"};
+var cf="all",aq=[],an=0,co=0;
+function gq(f){return f==="all"?Q.slice():Q.filter(function(q){return q.ch===f;});}
+function sh(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function fc(ch,btn){document.querySelectorAll(".cb").forEach(function(b){b.classList.remove("active");});btn.classList.add("active");cf=ch;build(gq(ch),false);}
+function rq(){build(sh(gq(cf)),true);}
+function build(qs,rand){aq=qs;an=0;co=0;up();var c=document.getElementById("qz");document.getElementById("sum").style.display="none";c.innerHTML="";var lc=null;qs.forEach(function(q,i){if(!rand&&q.ch!==lc){lc=q.ch;var d=document.createElement("div");d.className="cd";d.innerHTML="<h2>"+CT[q.ch]+"</h2>";c.appendChild(d);}var opts=rand?sh(q.o.map(function(t,j){return{t:t,j:j};})):q.o.map(function(t,j){return{t:t,j:j};});var card=document.createElement("div");card.className="qc";var ol=opts.map(function(o,k){return"<div class=\"opt\" data-orig=\""+o.j+"\" data-ans=\""+q.a+"\" data-qi=\""+i+"\" onclick=\"pk(this)\"><span class=\"ol\">"+L[k]+"</span><span>"+o.t+"</span></div>";}).join("");card.innerHTML="<div class=\"qh\"><span class=\"qn\">Q"+(i+1)+(rand?"":(" &middot; Ch"+q.ch))+"</span><span class=\"qt\">"+q.q+"</span></div><div class=\"opts\">"+ol+"</div><div class=\"fb\" id=\"fb-"+i+"\"></div>";c.appendChild(card);});}
+function pk(el){var p=el.parentElement;if(p.dataset.done==="1")return;p.dataset.done="1";var orig=+el.dataset.orig,ans=+el.dataset.ans,qi=+el.dataset.qi;var fb=document.getElementById("fb-"+qi);an++;if(orig===ans){co++;el.classList.add("correct");fb.textContent="Correct!";fb.className="fb correct";}else{el.classList.add("wrong");p.querySelectorAll(".opt").forEach(function(o){if(+o.dataset.orig===ans)o.classList.add("sc");});fb.textContent="Incorrect — correct answer highlighted in green.";fb.className="fb wrong";}p.querySelectorAll(".opt").forEach(function(o){o.classList.add("answered");});up();if(an===aq.length)setTimeout(ss,700);}
+function up(){var t=aq.length,pct=t?Math.round(an/t*100):0,s=an?Math.round(co/an*100):0;document.getElementById("pb").style.width=pct+"%";document.getElementById("pt").textContent=an+" / "+t+" answered";document.getElementById("sc").textContent="Score: "+s+"%";}
+function ss(){var pct=Math.round(co/aq.length*100);document.getElementById("fs").textContent=pct+"%";var msg=pct>=90?"Outstanding! You are exam ready.":pct>=75?"Great work! Review the ones you missed.":pct>=60?"Good effort, a bit more review will get you there.":"Keep studying, you have got this!";document.getElementById("ft").textContent="You got "+co+" out of "+aq.length+" correct. "+msg;document.getElementById("sum").style.display="block";document.getElementById("sum").scrollIntoView({behavior:"smooth"});}
+function rs(){document.getElementById("sum").style.display="none";build(gq(cf),false);window.scrollTo({top:0,behavior:"smooth"});}
+build(Q,false);
+</script>
+</body>
+</html>
